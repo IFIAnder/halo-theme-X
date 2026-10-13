@@ -283,6 +283,27 @@ theme-x/
 - **站内发瞬间**依赖瞬间插件；发布后是否需要审核由 Halo 的角色权限决定（站长 / 有发布权限的账号立即通过，其他账号会进入待审核，这也是插件侧 `momentService.create` 的既定行为）
 - **编辑个人资料**只能改显示名、简介与头像 —— 用户名与邮箱不在 `UpdateMyProfileRequest` 里，属于 Halo 的接口边界，不是主题的取舍
 
+## 回复区样式
+
+回复区用的是 Halo 评论插件（`halo-plugin-comment-widget`）。它是 **Lit + Shadow DOM** 组件，
+内部类名从主题 CSS 里盖不到 —— 但它把所有配色收敛成了 `--halo-cw-*` 自定义属性，
+而**自定义属性能穿透 Shadow 边界**，这就是官方的定制入口。
+
+主题把整套变量映射到了自己的配色上：
+
+| 插件变量 | 含义 | 映射到 |
+| --- | --- | --- |
+| `--halo-cw-primary-1/2/3-color` | 链接、焦点环、按钮 | 主题强调色 |
+| `--halo-cw-text-1/2/3-color` | 文字三级 | `--x-text` / `--x-dim` |
+| `--halo-cw-muted-1/2/3-color` | 背景与边框三级 | `--x-border` / `--x-bg-active` / `--x-card` |
+| `--halo-cw-base-font-size` / `-family` | 字号、字体 | 跟主题走 |
+
+> 这一步不是可选项。插件靠 `.dark` 类或 `prefers-color-scheme` 判断深色，
+> 而本主题用的是 `data-theme` 属性，插件识别不到 —— 不覆盖的话，
+> 深色主题下评论区会退回浅色配色，文字和背景糊在一起。
+
+想再改，直接覆盖同名变量即可；不要试图去写 `.item-avatar` 之类的内部类名，那些在 Shadow DOM 里。
+
 ## 动效
 
 v1.8.0 把散落各处的硬编码缓动收敛成一套变量（`--x-ease` / `--x-ease-out` / `--x-dur-fast` / `--x-dur` / `--x-dur-slow`），改一处全站生效，并补齐了此前缺失的过渡：

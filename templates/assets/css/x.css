@@ -453,10 +453,11 @@ ol {
 .x-nav-more {
   position: absolute;
   left: 0;
-  bottom: 100%;
+  /* 向下弹出：从「更多」按钮下沿展开 */
+  top: 100%;
   z-index: 60;
   min-width: 190px;
-  margin-bottom: 8px;
+  margin-top: 8px;
   padding: 4px 0;
   border-radius: 16px;
   background: var(--x-bg);
@@ -2519,4 +2520,49 @@ body.x-has-modal {
 .x-account-menu__item .x-icon {
   flex-shrink: 0;
   font-size: 19px;
+}
+
+
+/* ==========================================================================
+   21. 回复区（halo-plugin-comment-widget）
+   --------------------------------------------------------------------------
+   评论组件是 Lit + Shadow DOM，内部类名从外面盖不到。
+   但它把配色全部收敛成了 --halo-cw-* 自定义属性（见插件源码
+   packages/comment-widget/var.css），而自定义属性能穿透 Shadow 边界 ——
+   这是官方留的定制入口，也是唯一稳定的定制方式。
+
+   为什么必须覆盖：插件靠 .dark 类或 prefers-color-scheme 判断深色，
+   而本主题用的是 data-theme 属性，插件识别不到，于是它在深色主题下
+   会退回浅色配色 —— 文字偏深、色块发亮，跟正文完全割裂。
+
+   选择器用 html[data-theme] 而不是 :root，是为了压过插件自己的
+   :root / .dark 声明（权重 0-1-1 高于 0-1-0）；再补一条作用在
+   comment-widget 元素上的同值声明，防止插件往宿主元素上挂 .dark。
+   ========================================================================== */
+html[data-theme],
+html[data-theme] comment-widget {
+  /* 强调色：链接、焦点环、按钮 */
+  --halo-cw-primary-1-color: var(--x-accent);
+  --halo-cw-primary-2-color: var(--x-blue-hover);
+  --halo-cw-primary-3-color: var(--x-accent);
+
+  /* 文字三级 */
+  --halo-cw-text-1-color: var(--x-text);
+  --halo-cw-text-2-color: var(--x-text);
+  --halo-cw-text-3-color: var(--x-dim);
+
+  /* 背景 / 边框三级（插件里 muted-* 是 bg 与 border） */
+  --halo-cw-muted-1-color: var(--x-border);
+  --halo-cw-muted-2-color: var(--x-bg-active);
+  --halo-cw-muted-3-color: var(--x-card);
+
+  /* 字体跟主题走，否则评论区会用插件自带的 1rem 系统字体栈 */
+  --halo-cw-base-font-family: var(--x-font);
+  --halo-cw-base-font-size: var(--x-fs);
+}
+
+/* 插件的 :host 是 width:100% + flex 居中，这里保证它撑满回复区 */
+.x-replies__body comment-widget {
+  display: block;
+  width: 100%;
 }

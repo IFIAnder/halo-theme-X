@@ -6,15 +6,15 @@ spec:
   displayName: "X"
   author:
     name: Ander.
-    website: ""
+    website: "https://github.com/IFIAnder"
   description: "高仿 X（Twitter）的 Halo 2.x 主题。三栏时间线布局、Lights out / Dim / Light 三档配色、推文形态的文章卡片、话题与归档时间线 —— 把你的博客当作一个 X 账号来逛。"
-  logo: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI2IiBmaWxsPSIjMGYxNDE5Ii8+PHBhdGggZmlsbD0iI2U3ZTllYSIgZD0iTTk0LjEgMjEuOWg5LjZMODIuMiA0Ny42IDEwNy40IDk4SDg2LjNMNjkuMSA3NS43IDQ5LjQgOThoLTkuN2wyMy4xLTI3LjVMMzguMSAyMS45aDIxLjdsMTUuNSAyMC41IDE4LjgtMjAuNVptLTMuNCA2OS40aDUuM0w1NS4xIDI3LjVoLTUuN2w0MS4zIDYzLjhaIi8+PC9zdmc+Cg=="
-  homepage: ""
-  repo: ""
-  issues: ""
+  logo: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI2IiBmaWxsPSIjMGYxNDE5Ii8+PHBhdGggZmlsbD0iI2U3ZTllYSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjEuNDcgMjEuNikgc2NhbGUoMy4yKSIgZD0iTTE4LjI0NCAyLjI1aDMuMzA4bC03LjIyNyA4LjI2IDguNTAyIDExLjI0SDE2LjE3bC01LjIxNC02LjgxN0w0Ljk5IDIxLjc1SDEuNjhsNy43My04LjgzNUwxLjI1NCAyLjI1SDguMDhsNC43MTMgNi4yMzF6bS0xLjE2MSAxNy41MmgxLjgzM0w3LjA4NCA0LjEyNkg1LjExN3oiLz48L3N2Zz4="
+  homepage: "https://github.com/IFIAnder/halo-theme-X#readme"
+  repo: "https://github.com/IFIAnder/halo-theme-X"
+  issues: "https://github.com/IFIAnder/halo-theme-X/issues"
   settingName: "theme-x-setting"
   configMapName: "theme-x-configmap"
-  version: "1.8.0"
+  version: "1.8.1"
   requires: ">=2.0.0"
   license:
     - name: "MIT"

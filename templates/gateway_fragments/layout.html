@@ -5,6 +5,10 @@
   th:fragment="layout (title, head, body)"
   th:attr="data-default-theme=${theme.config.appearance?.color_scheme ?: 'dark'}"
   th:style="|--x-accent:${theme.config.appearance?.accent_color ?: '#1D9BF0'};--x-bg-dark-set:${theme.config.appearance?.bg_dark ?: '#000000'};--x-bg-dim-set:${theme.config.appearance?.bg_dim ?: '#15202B'};--x-bg-light-set:${theme.config.appearance?.bg_light ?: '#FFFFFF'};|"
+  th:with="
+    logoType=${theme.config.brand?.logo_type ?: 'x'},
+    logoImage=${theme.config.brand?.logo_image},
+    logoText=${#strings.isEmpty(theme.config.brand?.logo_text) ? site.title : theme.config.brand.logo_text}"
 >
   <head>
     <meta charset="UTF-8" />
@@ -39,8 +43,28 @@
   <body class="x-gateway">
     <div class="x-gateway__shell">
       <div class="x-gateway__brand">
-        <a class="x-gateway__logo" th:href="@{/}" aria-label="返回首页">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
+        <!-- 跟随主题设置里的「站点标识」：X Logo / 自定义图片 / 文字 -->
+        <a
+          class="x-gateway__logo"
+          th:href="@{/}"
+          th:classappend="${logoType == 'image' ? ' x-gateway__logo--image' : (logoType == 'text' ? ' x-gateway__logo--text' : '')}"
+          aria-label="返回首页"
+        >
+          <img
+            th:if="${logoType == 'image' and logoImage != null and logoImage != ''}"
+            th:src="@{${logoImage}}"
+            th:alt="${site.title}"
+          />
+          <span
+            th:if="${logoType == 'text'}"
+            class="x-gateway__logo-text"
+            th:text="${logoText}"
+          ></span>
+          <svg
+            th:if="${logoType != 'image' and logoType != 'text'}"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path
               fill="currentColor"
               d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"

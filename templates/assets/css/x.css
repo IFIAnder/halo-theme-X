@@ -1976,6 +1976,9 @@ body.x-has-modal {
   align-items: center;
   justify-content: center;
   padding: 16px;
+  /* flex 居中 + 面板比视口高时，溢出的部分会被裁掉且滚不动（顶部和底部都够不着）。
+     让它自己可滚，配合面板上的 margin: auto，既保持居中又不会裁切。 */
+  overflow-y: auto;
 }
 /* hidden 属性必须压过上面的 display:flex，否则关不掉 */
 .x-modal[hidden] {
@@ -1997,6 +2000,8 @@ body.x-has-modal {
   border-radius: 16px;
   box-shadow: 0 12px 40px var(--x-shadow);
   overflow: hidden;
+  /* 见上面 .x-modal 的说明：flex 里用 margin: auto 居中，内容超高时不会被裁 */
+  margin: auto;
   animation: x-modal-in 0.16s ease-out;
 }
 @keyframes x-modal-in {
@@ -2027,6 +2032,15 @@ body.x-has-modal {
   padding: 4px 16px 20px;
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* flex 子项默认 min-height: auto，不会被压到触发滚动 —— 内容一高就把面板撑出去，
+     超出部分被 .x-modal__panel 的 overflow: hidden 裁掉，于是底部的按钮既看不到也划不到。
+     必须显式 min-height: 0 才能真正滚动。移动端最容易踩到。 */
+  flex: 1 1 auto;
+  min-height: 0;
+}
+/* 头部（含「保存」按钮）固定住，别被内容挤扁 */
+.x-modal__head {
+  flex-shrink: 0;
 }
 
 /* ---------- 发瞬间 ---------- */
@@ -2418,6 +2432,13 @@ body.x-has-modal {
 @media (max-width: 705px) {
   .x-modal__panel {
     animation: x-sheet-in var(--x-dur-slow) var(--x-ease-out);
+    /* 移动端浏览器地址栏会占掉一截 vh，用 dvh 让面板始终落在可视区内 */
+    max-height: min(90vh, 720px);
+    max-height: min(88dvh, 720px);
+    width: 100%;
+  }
+  .x-modal {
+    padding: 10px;
   }
 }
 

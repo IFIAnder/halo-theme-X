@@ -307,3 +307,25 @@ body.x-gateway .halo-form-wrapper {
     font-size: 22px;
   }
 }
+
+/* ---------- 站点标识的另外两种形态（跟随主题设置） ---------- */
+.x-gateway__logo--image {
+  border-radius: 14px;
+}
+.x-gateway__logo--image img {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+.x-gateway__logo--text {
+  width: auto;
+  padding: 0 8px;
+  border-radius: 12px;
+}
+.x-gateway__logo-text {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}

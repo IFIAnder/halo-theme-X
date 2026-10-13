@@ -21,6 +21,7 @@
       annotationCover=${author != null and author.metadata != null and author.metadata.annotations != null and author.metadata.annotations['theme-x/cover'] != null ? author.metadata.annotations['theme-x/cover'] : ''},
       defaultCover=${theme.config.brand?.author_cover ?: (theme.config.brand?.banner ?: '')},
       authorCover=${not #strings.isEmpty(annotationCover) ? annotationCover : defaultCover},
+      authorLocation=${author != null and author.metadata != null and author.metadata.annotations != null and author.metadata.annotations['theme-x/location'] != null ? author.metadata.annotations['theme-x/location'] : ''},
       authorWebsite=${author != null and author.metadata != null and author.metadata.annotations != null and author.metadata.annotations['website'] != null ? author.metadata.annotations['website'] : ''},
       authorWebsiteLabel=${#strings.replace(#strings.replace(authorWebsite, 'https://', ''), 'http://', '')},
       canEdit=${theme.config.features?.enable_profile_edit == null or theme.config.features.enable_profile_edit},
@@ -73,6 +74,12 @@
           th:text="${authorBio}"
         ></p>
         <div class="x-profile__meta">
+          <!-- 位置：来自 theme-x/location 注解，halo-plugin-X 或后台手动写入 -->
+          <span class="x-profile__meta-item" th:if="${not #strings.isEmpty(authorLocation)}">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-location"></use></svg>
+            <span th:text="${authorLocation}"></span>
+          </span>
+
           <!-- 加入日期 -->
           <span class="x-profile__meta-item" th:if="${showJoinDate and not #strings.isEmpty(authorJoinDate)}">
             <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-calendar"></use></svg>

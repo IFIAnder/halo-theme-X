@@ -71,6 +71,41 @@
         ></textarea>
       </label>
 
+      <!--
+        以下三项由 halo-plugin-X 插件提供。主题不依赖它：
+        探测不到（插件没装 / 没启用）时整块保持隐藏，其它功能照常。
+      -->
+      <div class="x-pluginx" data-x-plugin-x hidden>
+        <div class="x-pluginx__head">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-sparkle"></use></svg>
+          <span>扩展资料</span>
+          <span class="x-pluginx__from">halo-plugin-X</span>
+        </div>
+
+        <label class="x-field">
+          <span class="x-field__label">个人主页背景图</span>
+          <input
+            class="x-field__input"
+            type="text"
+            maxlength="512"
+            placeholder="https://… 或 /upload/xxx.jpg"
+            data-x-profile-cover
+          />
+          <span class="x-field__note">留空表示不使用背景图，会回退到主题的渐变底</span>
+        </label>
+
+        <label class="x-field">
+          <span class="x-field__label">位置</span>
+          <input class="x-field__input" type="text" maxlength="64" placeholder="例如 上海" data-x-profile-location />
+        </label>
+
+        <label class="x-field">
+          <span class="x-field__label">个人网站</span>
+          <input class="x-field__input" type="text" maxlength="512" placeholder="https://example.com" data-x-profile-website />
+          <span class="x-field__note">会显示在你作者主页的资料行里</span>
+        </label>
+      </div>
+
       <p class="x-hint" data-x-profile-hint hidden></p>
     </div>
   </div>

@@ -283,6 +283,24 @@ theme-x/
 - **站内发瞬间**依赖瞬间插件；发布后是否需要审核由 Halo 的角色权限决定（站长 / 有发布权限的账号立即通过，其他账号会进入待审核，这也是插件侧 `momentService.create` 的既定行为）
 - **编辑个人资料**只能改显示名、简介与头像 —— 用户名与邮箱不在 `UpdateMyProfileRequest` 里，属于 Halo 的接口边界，不是主题的取舍
 
+## 与 halo-plugin-X 联动（可选）
+
+[halo-plugin-X](https://github.com/IFIAnder/halo-plugin-X) 是本主题的配套插件，用来补上 Halo 本身没有的那几项个人资料：
+
+| 字段 | 显示位置 | 存放 |
+| --- | --- | --- |
+| 个人主页背景图 | 作者主页顶部横幅 | `User.metadata.annotations["theme-x/cover"]` |
+| 位置 | 资料行 | `User.metadata.annotations["theme-x/location"]` |
+| 个人网站 | 资料行（可点击） | `User.metadata.annotations["website"]` |
+
+**主题不依赖这个插件。** 装上之后，「编辑个人资料」弹层里会多出这三项；没装则那一块整块隐藏，
+主题其余部分完全不受影响 —— 插件只做增强，不成为前提。
+
+探测方式很直接：主题向 `GET /apis/x.api.halo.run/v1alpha1/my-profile` 发一次请求，
+成功就显示扩展字段，失败就保持隐藏。保存时两个接口分开调用，扩展资料写失败也不会拦住显示名和简介。
+
+因为数据存的是 `User` 的注解，你也可以**不装插件**、直接在后台给某个用户加上这些注解，主题一样会认。
+
 ## 回复区样式
 
 回复区用的是 Halo 评论插件（`halo-plugin-comment-widget`）。它是 **Lit + Shadow DOM** 组件，

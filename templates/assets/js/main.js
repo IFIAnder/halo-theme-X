@@ -1254,6 +1254,36 @@
   }
 
   /* --- 编辑个人资料 --- */
+  /* halo-plugin-X 提供的扩展资料。拿不到就整块不显示 —— 主题不依赖这个插件。 */
+  var PLUGINX_API = '/apis/x.api.halo.run/v1alpha1/my-profile';
+
+  function fillPluginX(modal, profile) {
+    var box = $('[data-x-plugin-x]', modal);
+    if (!box) return;
+    box.hidden = false;
+    [['[data-x-profile-cover]', profile.cover],
+     ['[data-x-profile-location]', profile.location],
+     ['[data-x-profile-website]', profile.website]].forEach(function (pair) {
+      var el = $(pair[0], modal);
+      if (el) el.value = pair[1] || '';
+    });
+  }
+
+  function savePluginX(modal) {
+    var cover = $('[data-x-profile-cover]', modal);
+    var location = $('[data-x-profile-location]', modal);
+    var website = $('[data-x-profile-website]', modal);
+    /* 空字符串在插件侧表示「删除该字段」，语义正确，直接透传 */
+    return haloApi(PLUGINX_API, {
+      method: 'PUT',
+      body: {
+        cover: cover ? cover.value.trim() : null,
+        location: location ? location.value.trim() : null,
+        website: website ? website.value.trim() : null
+      }
+    });
+  }
+
   function initProfileEdit() {
     var modal = xModalEl('profile');
     if (!modal) return;
@@ -1265,6 +1295,19 @@
     var fileInput = $('[data-x-avatar-input]', modal);
     var avatarBox = $('[data-x-avatar-box]', modal);
     if (!nameInput || !saveBtn) return;
+
+    /* 探测 halo-plugin-X：装了就显示扩展字段，没装就保持隐藏 */
+    var pluginXOk = false;
+    haloApi(PLUGINX_API, { method: 'GET' })
+      .then(function (profile) {
+        pluginXOk = true;
+        fillPluginX(modal, profile || {});
+      })
+      .catch(function () {
+        pluginXOk = false;
+        var box = $('[data-x-plugin-x]', modal);
+        if (box) box.hidden = true;
+      });
 
     if (fileInput && avatarBox) {
       fileInput.addEventListener('change', function () {
@@ -1314,6 +1357,14 @@
         method: 'PUT',
         body: { displayName: displayName, bio: (bioInput && bioInput.value ? bioInput.value : '').trim() }
       })
+        .then(function () {
+          /* 扩展资料是插件的独立接口，失败了也不该拦住显示名/简介的保存 */
+          if (!pluginXOk) return null;
+          return savePluginX(modal).catch(function () {
+            toast('显示名和简介已保存，扩展资料没能写入');
+            return null;
+          });
+        })
         .then(function () {
           setHint(hint, '');
           closeModal();

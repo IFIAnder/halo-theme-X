@@ -2750,3 +2750,34 @@ html[data-theme] comment-widget {
     transform-origin: top left;
   }
 }
+
+/* ---------- 编辑资料弹层里的扩展字段（halo-plugin-X） ---------- */
+.x-pluginx {
+  margin: 4px 0 16px;
+  padding: 12px;
+  border: 1px solid var(--x-border);
+  border-radius: 12px;
+  background: var(--x-bg-hover);
+}
+.x-pluginx__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: var(--x-text);
+  font-size: 14px;
+  font-weight: 700;
+}
+.x-pluginx__head .x-icon {
+  font-size: 16px;
+  color: var(--x-accent);
+}
+.x-pluginx__from {
+  margin-left: auto;
+  color: var(--x-dim);
+  font-size: 12px;
+  font-weight: 500;
+}
+.x-pluginx .x-field:last-child {
+  margin-bottom: 0;
+}

@@ -1,0 +1,394 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: theme-x-setting
+spec:
+  forms:
+    - group: appearance
+      label: 外观配色
+      formSchema:
+        - $formkit: radio
+          name: color_scheme
+          label: 默认配色方案
+          help: X 的默认外观是 Lights out（纯黑）。这里是全站唯一权威来源 —— 你设成什么，访客就看到什么。
+          value: dark
+          options:
+            - label: Lights out（纯黑 · X 默认）
+              value: dark
+            - label: Dim（深蓝灰）
+              value: dim
+            - label: Light（亮色）
+              value: light
+            - label: 跟随系统
+              value: system
+        - $formkit: switch
+          name: allow_visitor_switch
+          label: 允许访客自行切换配色
+          help: 保持关闭（推荐）：全站统一用上面的方案，右上角不出现切换按钮，访客不可能把页面配色弄偏。打开后右上角会出现切换按钮，访客的选择只记在它自己的浏览器里，且你一改上面的方案它就自动作废
+          value: false
+        - $formkit: color
+          name: accent_color
+          label: 强调色
+          help: X 的品牌蓝为 #1D9BF0，改这里可以整体换色
+          value: "#1D9BF0"
+        - $formkit: color
+          name: bg_dark
+          label: 背景色 · Lights out
+          help: 默认纯黑 #000000
+          value: "#000000"
+        - $formkit: color
+          name: bg_dim
+          label: 背景色 · Dim
+          help: 默认深蓝灰 #15202B
+          value: "#15202B"
+        - $formkit: color
+          name: bg_light
+          label: 背景色 · Light
+          help: 默认纯白 #FFFFFF
+          value: "#FFFFFF"
+        - $formkit: radio
+          name: font_size
+          label: 正文字号
+          value: "15"
+          options:
+            - label: 小 14px
+              value: "14"
+            - label: 标准 15px（X 默认）
+              value: "15"
+            - label: 大 17px
+              value: "17"
+        - $formkit: switch
+          name: round_media
+          label: 媒体使用大圆角（16px）
+          value: true
+        - $formkit: radio
+          name: timeline_mode
+          label: 时间线形态
+          value: comfortable
+          options:
+            - label: 舒适（显示封面大图）
+              value: comfortable
+            - label: 紧凑（纯文字，更接近纯推文流）
+              value: compact
+
+    - group: brand
+      label: 账号信息与标识
+      formSchema:
+        - $formkit: radio
+          name: logo_type
+          label: 站点标识样式
+          value: x
+          options:
+            - label: X Logo（默认）
+              value: x
+            - label: 自定义图片
+              value: image
+            - label: 文字
+              value: text
+        - $formkit: attachment
+          name: logo_image
+          label: 自定义 Logo 图片
+          help: 选择「自定义图片」时生效，建议使用正方形图
+        - $formkit: text
+          name: logo_text
+          label: Logo 文字
+          help: 选择「文字」时生效，留空则使用站点标题
+        - $formkit: text
+          name: logo_subtitle
+          label: Logo 副标题
+          help: 可选，显示在 Logo 文字下方的小字
+        - $formkit: text
+          name: handle
+          label: 用户名（@handle）
+          placeholder: 留空则使用站点标题的 slug 形式
+        - $formkit: text
+          name: display_name
+          label: 显示名
+          placeholder: 留空则使用站点标题
+        - $formkit: textarea
+          name: bio
+          label: 简介
+          placeholder: 留空则使用站点副标题
+        - $formkit: attachment
+          name: avatar
+          label: 头像
+          help: 会覆盖站点 Logo，在左侧导航与推文卡片中使用
+        - $formkit: attachment
+          name: banner
+          label: 个人主页封面图
+        - $formkit: switch
+          name: verified
+          label: 显示认证蓝标
+          help: 总开关。关掉后全站都不显示蓝标
+          value: true
+        - $formkit: textarea
+          name: verified_users
+          label: 带认证标识的用户
+          placeholder: 用户名，多个用英文逗号分隔，例如 ander,friedegg
+          help: 留空 = 所有作者都显示蓝标；填写后只有名单里的用户名显示。用户名即 /authors/ 后面的那段
+
+    - group: layout
+      label: 布局
+      formSchema:
+        - $formkit: switch
+          name: show_left_nav
+          label: 桌面端显示左侧导航栏
+          value: true
+        - $formkit: switch
+          name: show_right_rail
+          label: 桌面端显示右侧栏
+          value: true
+        - $formkit: switch
+          name: show_composer
+          label: 首页顶部显示「发帖」输入框
+          value: true
+        - $formkit: switch
+          name: show_mobile_nav
+          label: 移动端显示底部导航栏
+          value: true
+
+    - group: features
+      label: 内容与交互
+      formSchema:
+        - $formkit: switch
+          name: show_stats
+          label: 显示浏览 / 点赞 / 回复数
+          value: true
+        - $formkit: switch
+          name: enable_upvote
+          label: 启用点赞按钮
+          value: true
+        - $formkit: switch
+          name: show_cover
+          label: 时间线中显示文章封面图
+          value: true
+        - $formkit: switch
+          name: enable_comment
+          label: 详情页显示回复区（评论组件）
+          value: true
+        - $formkit: switch
+          name: enable_search
+          label: 启用搜索页
+          value: true
+        - $formkit: switch
+          name: enable_trends
+          label: 右侧栏显示「正在发生」趋势模块
+          value: true
+        - $formkit: switch
+          name: show_reading_time
+          label: 时间线中显示预计阅读时长
+          value: true
+        - $formkit: switch
+          name: show_join_date
+          label: 作者主页显示加入日期
+          help: 对任何作者的个人主页（/authors/xxx）都生效。优先取注册时间，缺失时回退到账号创建时间。关闭后整块隐藏
+          value: true
+        - $formkit: switch
+          name: enable_moment_publish
+          label: 显示瞬间投稿入口
+          help: 移动端右下角悬浮按钮 + 首页顶部的「有什么新鲜事？」，未登录时点击会先跳登录
+          value: true
+        - $formkit: switch
+          name: enable_inline_compose
+          label: 站内直接发瞬间（不跳个人中心）
+          help: 开启后，投稿入口会在主题内弹出 X 风格发帖框，直接调用瞬间接口发布；关闭则跳转到下面的「瞬间发布地址」
+          value: true
+        - $formkit: switch
+          name: enable_profile_edit
+          label: 作者主页内编辑个人资料
+          help: 开启后，作者本人在自己的作者主页会看到「编辑个人资料」，可直接改显示名、简介与头像
+          value: true
+        - $formkit: switch
+          name: show_moments_nav
+          label: 导航中显示「瞬间」
+          help: 需要先安装「瞬间」插件（halo-plugin-moments），否则该项会指向空白页
+          value: true
+        - $formkit: text
+          name: moment_comment_group
+          label: 瞬间评论 · 模型分组
+          help: 默认 moment.halo.run。若瞬间详情页的回复区不显示，请按你的评论插件实际值调整
+          value: "moment.halo.run"
+        - $formkit: text
+          name: moment_comment_kind
+          label: 瞬间评论 · 模型类型
+          help: 默认 Moment
+          value: "Moment"
+
+    - group: routes
+      label: 路由与账号入口
+      formSchema:
+        - $formkit: switch
+          name: show_login_entry
+          label: 显示登录入口
+          help: 未登录时在顶栏与左下角显示「登录」
+          value: true
+        - $formkit: switch
+          name: show_signup_entry
+          label: 显示注册入口
+          help: 还需要在「系统设置 → 用户」中开启「允许注册」，两者都开启才会出现
+          value: true
+        - $formkit: text
+          name: login_uri
+          label: 登录页地址
+          help: Halo 2.20+ 默认为 /login
+          value: "/login"
+        - $formkit: text
+          name: signup_uri
+          label: 注册页地址
+          value: "/signup"
+        - $formkit: text
+          name: uc_uri
+          label: 个人中心地址（旧入口）
+          help: Halo 自带的个人中心，默认为 /uc。开启「站内直接发瞬间」后，它只会作为侧边账号菜单里的备用入口保留
+          value: "/uc"
+        - $formkit: text
+          name: moment_publish_uri
+          label: 瞬间发布地址（回退用）
+          help: 关闭「站内直接发瞬间」时，投稿入口会跳到这里，默认为 /uc/moments
+          value: "/uc/moments"
+        - $formkit: text
+          name: authors_uri
+          label: 作者页路由前缀
+          help: Halo 默认为 /authors。头像、账号卡片点击后会进入这里（主题内的个人主页），不再跳转个人中心
+          value: "/authors"
+        - $formkit: text
+          name: moments_uri
+          label: 瞬间路由前缀
+          help: 瞬间插件默认为 /moments
+          value: "/moments"
+
+    - group: navigation
+      label: 导航自定义
+      formSchema:
+        - $formkit: radio
+          name: nav_home
+          label: 主页
+          value: main
+          options:
+            - label: 常驻显示
+              value: main
+            - label: 折叠到「更多」
+              value: more
+            - label: 隐藏
+              value: hide
+        - $formkit: radio
+          name: nav_moments
+          label: 瞬间
+          help: 需要安装瞬间插件
+          value: main
+          options:
+            - label: 常驻显示
+              value: main
+            - label: 折叠到「更多」
+              value: more
+            - label: 隐藏
+              value: hide
+        - $formkit: radio
+          name: nav_explore
+          label: 探索（分类）
+          value: main
+          options:
+            - label: 常驻显示
+              value: main
+            - label: 折叠到「更多」
+              value: more
+            - label: 隐藏
+              value: hide
+        - $formkit: radio
+          name: nav_topics
+          label: 话题（标签）
+          value: main
+          options:
+            - label: 常驻显示
+              value: main
+            - label: 折叠到「更多」
+              value: more
+            - label: 隐藏
+              value: hide
+        - $formkit: radio
+          name: nav_timeline
+          label: 时间线（归档）
+          value: main
+          options:
+            - label: 常驻显示
+              value: main
+            - label: 折叠到「更多」
+              value: more
+            - label: 隐藏
+              value: hide
+        - $formkit: radio
+          name: nav_search
+          label: 搜索
+          value: main
+          options:
+            - label: 常驻显示
+              value: main
+            - label: 折叠到「更多」
+              value: more
+            - label: 隐藏
+              value: hide
+        - $formkit: switch
+          name: show_more_nav
+          label: 显示「更多」入口
+          help: 关闭后，被折叠的导航项将完全不可见
+          value: true
+        - $formkit: repeater
+          name: custom_nav
+          label: 自定义导航项
+          help: 可以自由增删、排序。名称或链接留空的条目不显示
+          addLabel: 添加导航项
+          value:
+            - label: ""
+              url: ""
+              icon: "i-hash"
+              pos: "main"
+          children:
+            - $formkit: text
+              name: label
+              label: 名称
+              value: ""
+            - $formkit: text
+              name: url
+              label: 链接
+              placeholder: https://example.com 或 /tags
+              value: ""
+            - $formkit: select
+              name: icon
+              label: 图标
+              value: "i-hash"
+              options:
+                - label: 井号 #
+                  value: "i-hash"
+                - label: 星芒
+                  value: "i-sparkle"
+                - label: 时钟
+                  value: "i-clock"
+                - label: 书签
+                  value: "i-bookmark"
+                - label: 人像
+                  value: "i-profile"
+                - label: 社区
+                  value: "i-community"
+                - label: 图片
+                  value: "i-image"
+                - label: 日历
+                  value: "i-calendar"
+                - label: 笔
+                  value: "i-compose"
+                - label: 分享
+                  value: "i-share"
+                - label: 爱心
+                  value: "i-heart"
+                - label: 放大镜
+                  value: "i-search"
+            - $formkit: radio
+              name: pos
+              label: 位置
+              value: "main"
+              options:
+                - label: 常驻显示
+                  value: "main"
+                - label: 折叠到「更多」
+                  value: "more"
+                - label: 隐藏
+                  value: "hide"

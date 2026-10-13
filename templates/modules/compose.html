@@ -1,0 +1,80 @@
+<!--
+  发瞬间弹层（X 风格）
+  ------------------------------------------------------------------
+  为什么能直接在主题里发帖：
+  Halo 的 CSRF 只保护表单类端点，`/apis/**` 明确在豁免名单里
+  （见 CsrfConfigurer：NegatedServerWebExchangeMatcher pathMatchers("/api/**", "/apis/**", ...)），
+  所以带会话 cookie 直接 fetch 即可，不需要任何令牌。
+
+  接口：POST /apis/uc.api.moment.halo.run/v1alpha1/moments
+  注意：插件侧的 MomentServiceImpl#create 不会替我们把 raw 转成 html，
+        所以前端提交时要把 raw 与 html 一起给上，否则正文是空白。
+
+  参数：avatarUrl / initial / displayName —— 用于左侧头像
+-->
+<div
+  class="x-modal"
+  th:fragment="modal(avatarUrl, initial, displayName)"
+  data-x-modal="compose"
+  hidden
+>
+  <div class="x-modal__mask" data-x-modal-close></div>
+
+  <div class="x-modal__panel x-modal__panel--compose" role="dialog" aria-modal="true" aria-label="发布瞬间">
+    <header class="x-modal__head">
+      <button class="x-iconbtn" type="button" data-x-modal-close aria-label="关闭">
+        <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-close"></use></svg>
+      </button>
+      <span class="x-modal__title">发布瞬间</span>
+      <button
+        class="x-btn x-btn--primary x-btn--sm"
+        type="button"
+        data-x-compose-submit
+        disabled
+      >发布</button>
+    </header>
+
+    <div class="x-modal__body">
+      <div class="x-compose">
+        <img
+          class="x-avatar x-avatar--40"
+          th:if="${not #strings.isEmpty(avatarUrl)}"
+          th:src="@{${avatarUrl}}"
+          th:alt="${displayName}"
+        />
+        <span
+          class="x-avatar x-avatar--40 x-avatar--fallback"
+          th:unless="${not #strings.isEmpty(avatarUrl)}"
+          th:text="${initial}"
+        ></span>
+
+        <div class="x-compose__main">
+          <textarea
+            class="x-compose__input"
+            rows="2"
+            maxlength="2000"
+            placeholder="有什么新鲜事？"
+            aria-label="瞬间内容"
+            data-x-compose-input
+          ></textarea>
+
+          <div class="x-compose__foot">
+            <div class="x-compose__icons" aria-hidden="true">
+              <span class="x-compose__icon"><svg class="x-icon" viewBox="0 0 24 24"><use href="#i-image"></use></svg></span>
+              <span class="x-compose__icon"><svg class="x-icon" viewBox="0 0 24 24"><use href="#i-hash"></use></svg></span>
+              <span class="x-compose__icon"><svg class="x-icon" viewBox="0 0 24 24"><use href="#i-calendar"></use></svg></span>
+            </div>
+            <span class="x-compose__count" data-x-compose-count></span>
+          </div>
+
+          <p class="x-compose__hint">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-community"></use></svg>
+            <span>所有人可见</span>
+          </p>
+        </div>
+      </div>
+
+      <p class="x-hint" data-x-compose-status hidden></p>
+    </div>
+  </div>
+</div>

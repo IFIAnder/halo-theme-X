@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${category.spec.displayName}"></title>
+  </th:block>
+    <th:block th:fragment="content">
+      <header class="x-topbar">
+        <div class="x-topbar__row">
+          <a class="x-iconbtn" href="/categories" data-x-action="back" aria-label="返回">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-back"></use></svg>
+          </a>
+          <div class="x-topbar__headline">
+            <h1 class="x-topbar__title" th:text="${category.spec.displayName}"></h1>
+            <span class="x-topbar__sub" th:text="${category.postCount + ' 篇帖子'}"></span>
+          </div>
+          <div th:replace="~{modules/account :: actions}"></div>
+        </div>
+      </header>
+
+      <div class="x-category-hero" th:if="${not #strings.isEmpty(category.spec.cover)}">
+        <img th:src="@{${category.spec.cover}}" th:alt="${category.spec.displayName}" />
+      </div>
+
+      <p class="x-topic-desc" th:if="${not #strings.isEmpty(category.spec.description)}" th:text="${category.spec.description}"></p>
+
+      <div class="x-timeline" data-x-timeline>
+        <th:block th:each="post : ${posts.items}">
+          <div th:replace="~{modules/post-card :: card(${post})}"></div>
+        </th:block>
+      </div>
+
+      <div class="x-empty" th:if="${posts.items == null or #lists.isEmpty(posts.items)}">
+        <h2>这个分类下还没有帖子</h2>
+      </div>
+
+      <div class="x-loadmore" th:if="${posts.hasPrevious() or posts.hasNext()}">
+        <a class="x-btn x-btn--outline" th:if="${posts.hasPrevious()}" th:href="@{${posts.prevUrl}}">上一页</a>
+        <span class="x-loadmore__page" th:text="${posts.page + ' / ' + posts.totalPages}"></span>
+        <a class="x-btn x-btn--outline" th:if="${posts.hasNext()}" th:href="@{${posts.nextUrl}}">下一页</a>
+      </div>
+    </th:block>
+</html>

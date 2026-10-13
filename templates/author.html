@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${(author != null ? author.spec.displayName : '作者') + ' / ' + site.title}"></title>
+  </th:block>
+  <th:block
+    th:fragment="content"
+    th:with="
+      authorName=${author != null ? author.spec.displayName : '作者'},
+      authorHandle=${author != null and author.metadata != null ? author.metadata.name : 'unknown'},
+      authorAvatar=${author != null ? author.spec.avatar : ''},
+      authorBio=${author != null ? author.spec.bio : ''},
+      showJoinDate=${theme.config.features?.show_join_date == null or theme.config.features.show_join_date},
+      authorJoinDate=${author != null and author.spec != null and not #strings.isEmpty(author.spec.registeredAt) ? author.spec.registeredAt : (author != null and author.metadata != null ? (author.metadata.creationTimestamp ?: '') : '')},
+      initial=${#strings.isEmpty(authorName) ? 'A' : #strings.substring(authorName, 0, 1)},
+      postTotal=${posts != null ? posts.total : 0},
+      authorPosts=${posts != null ? posts.items : null},
+      ucUri=${theme.config.routes?.uc_uri ?: '/uc'},
+      canEdit=${theme.config.features?.enable_profile_edit == null or theme.config.features.enable_profile_edit},
+      isSelf=${#authentication != null and #authentication.isAuthenticated() and #authentication.name == authorHandle}
+    "
+  >
+    <header class="x-topbar x-topbar--detail">
+      <div class="x-topbar__row">
+        <a class="x-iconbtn" href="/" data-x-action="back" aria-label="返回">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-back"></use></svg>
+        </a>
+        <div class="x-topbar__headline">
+          <h1 class="x-topbar__title" th:text="${authorName}"></h1>
+          <span class="x-topbar__sub" th:text="${postTotal + ' 篇帖子'}"></span>
+        </div>
+        <div th:replace="~{modules/account :: actions}"></div>
+      </div>
+    </header>
+
+    <section class="x-profile">
+      <div class="x-profile__banner">
+        <div class="x-profile__banner-fallback"></div>
+      </div>
+      <div class="x-profile__bar">
+        <img
+          class="x-avatar x-avatar--96 x-profile__avatar"
+          th:if="${not #strings.isEmpty(authorAvatar)}"
+          th:src="@{${authorAvatar}}"
+          th:alt="${authorName}"
+        />
+        <span class="x-avatar x-avatar--96 x-avatar--fallback x-profile__avatar" th:unless="${not #strings.isEmpty(authorAvatar)}" th:text="${initial}"></span>
+        <!-- 作者本人：直接在主页改资料，不必再跑去个人中心 -->
+        <button
+          class="x-btn x-btn--outline x-profile__edit"
+          type="button"
+          th:if="${isSelf and canEdit}"
+          data-x-modal-open="profile"
+        >编辑个人资料</button>
+      </div>
+      <div class="x-profile__info">
+        <h2 class="x-profile__name">
+          <span th:text="${authorName}"></span>
+          <th:block th:replace="~{modules/verified :: badge(${authorHandle})}"></th:block>
+        </h2>
+        <span class="x-profile__handle" th:text="${'@' + authorHandle}"></span>
+        <p
+          class="x-profile__bio"
+          th:if="${authorBio != null and not #strings.isEmpty(authorBio)}"
+          th:text="${authorBio}"
+        ></p>
+        <div class="x-profile__meta" th:if="${showJoinDate and not #strings.isEmpty(authorJoinDate)}">
+          <span class="x-profile__meta-item">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-calendar"></use></svg>
+            <span>
+              加入于
+              <span
+                data-x-date="yyyy-MM-dd"
+                th:attr="data-datetime=${authorJoinDate}"
+                th:text="${authorJoinDate}"
+              >—</span>
+            </span>
+          </span>
+        </div>
+        <!-- 旧版个人中心入口保留，方便改密码 / 看插件页面 -->
+        <div class="x-profile__meta" th:if="${isSelf}">
+          <a class="x-profile__meta-item x-profile__meta-link" th:href="@{${ucUri}}">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-profile"></use></svg>
+            <span>个人中心（旧入口）</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <nav class="x-tabs">
+      <span class="x-tab is-active">帖子</span>
+    </nav>
+
+    <th:block th:if="${authorPosts != null}">
+      <div class="x-timeline" data-x-timeline>
+        <th:block th:each="post : ${authorPosts}">
+          <div th:replace="~{modules/post-card :: card(${post})}"></div>
+        </th:block>
+      </div>
+    </th:block>
+
+    <div class="x-empty" th:if="${authorPosts == null or #lists.isEmpty(authorPosts)}">
+      <h2>这位作者还没有发布内容</h2>
+    </div>
+
+    <div class="x-loadmore" th:if="${posts != null and (posts.hasPrevious() or posts.hasNext())}">
+      <a class="x-btn x-btn--outline" th:if="${posts.hasPrevious()}" th:href="@{${posts.prevUrl}}">上一页</a>
+      <span class="x-loadmore__page" th:text="${posts.page + ' / ' + posts.totalPages}"></span>
+      <a class="x-btn x-btn--outline" th:if="${posts.hasNext()}" th:href="@{${posts.nextUrl}}">下一页</a>
+    </div>
+
+    <!-- 编辑个人资料弹层（仅作者本人） -->
+    <th:block th:if="${isSelf and canEdit}">
+      <div th:replace="~{modules/profile-edit :: modal(${authorName}, ${authorBio}, ${authorAvatar}, ${initial}, ${authorHandle})}"></div>
+    </th:block>
+  </th:block>
+</html>

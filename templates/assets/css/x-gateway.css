@@ -1,0 +1,309 @@
+/* ==========================================================================
+   X 主题 · 认证页面（登录 / 注册 / 找回密码等）
+   只保留 Halo 的逻辑脚本（basicScriptResources），样式完全由主题接管。
+   ========================================================================== */
+
+html,
+body.x-gateway {
+  min-height: 100%;
+}
+
+body.x-gateway {
+  margin: 0;
+  background: var(--x-bg);
+  color: var(--x-text);
+  font-family: var(--x-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 兼容 Halo 默认类名（.gateway-page 等），使其不再需要外部样式表 */
+body.x-gateway.gateway-page,
+body.x-gateway .gateway-wrapper,
+body.x-gateway .halo-form-wrapper {
+  display: block;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+}
+
+/* ---------- 外层 ---------- */
+.x-gateway__shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+.x-gateway__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.x-gateway__logo {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  color: var(--x-text);
+  transition: background 0.15s ease;
+}
+.x-gateway__logo:hover {
+  background: var(--x-bg-hover);
+}
+.x-gateway__logo svg {
+  width: 32px;
+  height: 32px;
+  fill: currentColor;
+}
+
+.x-gateway__site {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.x-gateway__sub {
+  margin: 0;
+  color: var(--x-dim);
+  font-size: 14px;
+  text-align: center;
+}
+
+.x-gateway__card {
+  width: 100%;
+  max-width: 440px;
+  padding: 32px;
+  box-sizing: border-box;
+  border: 1px solid var(--x-border);
+  border-radius: 20px;
+  background: var(--x-bg);
+}
+
+.x-gateway__footer {
+  color: var(--x-dim);
+  font-size: 13px;
+}
+.x-gateway__footer a {
+  color: var(--x-accent);
+  text-decoration: none;
+}
+.x-gateway__footer a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- 表单（覆盖 Halo 默认类名） ---------- */
+.halo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+.halo-form .form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+.halo-form .form-label-group {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.halo-form label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--x-dim);
+}
+
+.halo-form .form-item-extra-link {
+  color: var(--x-accent);
+  font-size: 13px;
+  text-decoration: none;
+}
+.halo-form .form-item-extra-link:hover {
+  text-decoration: underline;
+}
+
+.halo-form .form-input,
+.halo-form .form-input-stack {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid var(--x-border);
+  border-radius: 10px;
+  background: transparent;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.halo-form .form-input:focus-within,
+.halo-form .form-input-stack:focus-within {
+  border-color: var(--x-accent);
+  background: var(--x-bg-hover);
+}
+
+.halo-form input[type="text"],
+.halo-form input[type="password"],
+.halo-form input[type="email"],
+.halo-form input[type="tel"] {
+  flex: 1;
+  width: 100%;
+  height: 50px;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--x-text);
+  font-family: inherit;
+  font-size: 15px;
+}
+.halo-form input::placeholder {
+  color: var(--x-dimmer);
+}
+
+/* 密码可见切换按钮 */
+.halo-form .toggle-password-button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--x-dim);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.halo-form .toggle-password-button:hover {
+  background: var(--x-bg-active);
+  color: var(--x-text);
+}
+.halo-form .toggle-password-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.halo-form .form-item-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+.halo-form .form-item-compact label {
+  font-weight: 400;
+  color: var(--x-dim);
+}
+.halo-form input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--x-accent);
+  cursor: pointer;
+}
+
+/* 提交按钮：X 风格胶囊大按钮 */
+.halo-form button[type="submit"] {
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--x-accent);
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.halo-form button[type="submit"]:hover {
+  background: var(--x-blue-hover);
+}
+.halo-form button[type="submit"]:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* 表单下方提示（注册 / 返回网站 / 语言切换） */
+.signup-notice-content,
+.returntosite-content,
+.language-switcher {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--x-dim);
+}
+.signup-notice-content a,
+.returntosite-content a {
+  color: var(--x-accent);
+  text-decoration: none;
+}
+.signup-notice-content a:hover,
+.returntosite-content a:hover {
+  text-decoration: underline;
+}
+
+.language-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+.language-switcher label {
+  display: inline-flex;
+  color: var(--x-dim);
+}
+.language-switcher label svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+.language-switcher select {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--x-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--x-text);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.language-switcher select:focus {
+  border-color: var(--x-accent);
+  outline: none;
+}
+
+/* 认证页里出现的其它 Halo 元素 */
+.gateway-page .halo-logo,
+.gateway-page .halo-logo img {
+  display: none;
+}
+
+/* 移动端 */
+@media (max-width: 520px) {
+  .x-gateway__shell {
+    padding: 28px 16px;
+    gap: 18px;
+  }
+  .x-gateway__card {
+    padding: 24px 20px;
+    border-radius: 16px;
+  }
+  .x-gateway__site {
+    font-size: 22px;
+  }
+}

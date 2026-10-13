@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${singlePage.spec.title}"></title>
+  </th:block>
+    <th:block th:fragment="content">
+      <header class="x-topbar x-topbar--detail">
+        <div class="x-topbar__row">
+          <a class="x-iconbtn" href="/" data-x-action="back" aria-label="返回">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-back"></use></svg>
+          </a>
+          <h1 class="x-topbar__title" th:text="${singlePage.spec.title}"></h1>
+          <div th:replace="~{modules/account :: actions}"></div>
+        </div>
+      </header>
+
+      <article class="x-detail">
+        <h1 class="x-detail__title" th:text="${singlePage.spec.title}"></h1>
+        <div class="x-detail__content x-prose" th:utext="${singlePage.content.content}"></div>
+        <div class="x-detail__meta">
+          <time th:attr="datetime=${singlePage.spec.publishTime}" th:text="${singlePage.spec.publishTime}"></time>
+        </div>
+      </article>
+
+      <section class="x-replies" id="comments">
+        <h2 class="x-replies__title">回复</h2>
+        <div class="x-replies__body">
+          <th:block th:if="${theme.config.features?.enable_comment == null or theme.config.features.enable_comment}">
+            <th:block th:if="${haloCommentEnabled}">
+              <halo:comment group="content.halo.run" kind="SinglePage" th:attr="name=${singlePage.metadata.name}" />
+            </th:block>
+            <p class="x-replies__empty" th:unless="${haloCommentEnabled}">
+              评论功能未启用，或者还没有安装评论插件。
+            </p>
+          </th:block>
+        </div>
+      </section>
+    </th:block>
+</html>

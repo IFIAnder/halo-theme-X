@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${site.title}"></title>
+  </th:block>
+    <th:block
+      th:fragment="content"
+      th:with="
+        avatarUrl=${theme.config.brand?.avatar ?: site.logo},
+        displayName=${#strings.isEmpty(theme.config.brand?.display_name) ? site.title : theme.config.brand.display_name},
+        initial=${#strings.isEmpty(displayName) ? 'H' : #strings.substring(displayName, 0, 1)}
+      "
+    >
+      <!-- 顶栏 -->
+      <header class="x-topbar">
+        <div class="x-topbar__row">
+          <h1 class="x-topbar__title">主页</h1>
+          <div th:replace="~{modules/account :: actions}"></div>
+        </div>
+        <nav class="x-tabs" role="tablist">
+          <button class="x-tab is-active" type="button" role="tab" data-x-tab="all">为你推荐</button>
+          <button class="x-tab" type="button" role="tab" data-x-tab="pinned">精选</button>
+        </nav>
+      </header>
+
+      <!-- 发帖框 -->
+      <div
+        class="x-composer"
+        th:if="${(theme.config.features?.enable_moment_publish == null or theme.config.features.enable_moment_publish)
+                 and (theme.config.layout?.show_composer == null or theme.config.layout.show_composer)}"
+        th:with="publishUri=${theme.config.routes?.moment_publish_uri ?: '/uc/moments'},
+                 loginUri=${theme.config.routes?.login_uri ?: '/login'},
+                 inlineCompose=${theme.config.features?.enable_inline_compose == null or theme.config.features.enable_inline_compose}"
+      >
+        <img
+          class="x-avatar x-avatar--40"
+          th:if="${not #strings.isEmpty(avatarUrl)}"
+          th:src="@{${avatarUrl}}"
+          th:alt="${displayName}"
+        />
+        <span class="x-avatar x-avatar--40 x-avatar--fallback" th:unless="${not #strings.isEmpty(avatarUrl)}" th:text="${initial}"></span>
+        <div class="x-composer__body">
+          <th:block sec:authorize="isAuthenticated()">
+            <button
+              class="x-composer__placeholder"
+              type="button"
+              th:if="${inlineCompose}"
+              data-x-modal-open="compose"
+            >有什么新鲜事？</button>
+            <a
+              class="x-composer__placeholder"
+              th:unless="${inlineCompose}"
+              th:href="@{${publishUri}}"
+            >有什么新鲜事？</a>
+          </th:block>
+          <a
+            class="x-composer__placeholder x-composer__placeholder--guest"
+            sec:authorize="isAnonymous()"
+            th:href="@{${loginUri}(redirect_uri=${publishUri})}"
+          >登录后即可发布瞬间</a>
+          <div class="x-composer__bar">
+            <div class="x-composer__icons" aria-hidden="true">
+              <span class="x-composer__icon"><svg class="x-icon" viewBox="0 0 24 24"><use href="#i-image"></use></svg></span>
+              <span class="x-composer__icon"><svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-hash"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-hash-f"></use></svg></span>
+              <span class="x-composer__icon"><svg class="x-icon" viewBox="0 0 24 24"><use href="#i-calendar"></use></svg></span>
+            </div>
+            <th:block sec:authorize="isAuthenticated()">
+              <button
+                class="x-btn x-btn--primary x-btn--sm"
+                type="button"
+                th:if="${inlineCompose}"
+                data-x-modal-open="compose"
+              >发布</button>
+              <a
+                class="x-btn x-btn--primary x-btn--sm"
+                th:unless="${inlineCompose}"
+                th:href="@{${publishUri}}"
+              >发布</a>
+            </th:block>
+            <a
+              class="x-btn x-btn--primary x-btn--sm"
+              sec:authorize="isAnonymous()"
+              th:href="@{${loginUri}(redirect_uri=${publishUri})}"
+            >登录</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 时间线 -->
+      <div class="x-timeline" data-x-timeline>
+        <th:block th:each="post : ${posts.items}">
+          <div th:replace="~{modules/post-card :: card(${post})}"></div>
+        </th:block>
+      </div>
+
+      <!-- 空状态 -->
+      <div class="x-empty" th:if="${posts.items == null or #lists.isEmpty(posts.items)}">
+        <h2>这里还很安静</h2>
+        <p>还没有发布任何内容，去后台写下第一条帖子吧。</p>
+      </div>
+
+      <!-- 精选为空 -->
+      <div class="x-empty x-empty--pinned" hidden>
+        <h2>还没有精选内容</h2>
+        <p>在后台把某篇文章设为「置顶」，它就会出现在这里。</p>
+      </div>
+
+      <!-- 分页 -->
+      <div class="x-loadmore" th:if="${posts.hasNext()}">
+        <a class="x-btn x-btn--outline" th:href="@{${posts.nextUrl}}">加载更多帖子</a>
+      </div>
+    </th:block>
+</html>

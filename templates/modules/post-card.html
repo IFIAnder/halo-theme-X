@@ -1,0 +1,151 @@
+<article
+  class="x-post"
+  th:fragment="card(post)"
+  th:with="
+    author=${post.owner},
+    authorName=${author != null ? author.displayName : '匿名作者'},
+    authorHandle=${author != null and not #strings.isEmpty(author.name) ? author.name : 'unknown'},
+    authorAvatar=${author != null ? author.avatar : ''},
+    authorLink=${author != null and not #strings.isEmpty(author.permalink) ? author.permalink : '#'},
+    initial=${#strings.isEmpty(authorName) ? 'A' : #strings.substring(authorName, 0, 1)},
+    showCover=${theme.config.features?.show_cover == null or theme.config.features.show_cover},
+    showStats=${theme.config.features?.show_stats == null or theme.config.features.show_stats},
+    showReading=${theme.config.features?.show_reading_time != null and theme.config.features.show_reading_time}
+  "
+  th:attr="data-href=${post.status.permalink},data-post-name=${post.metadata.name},data-pinned=${post.spec.pinned}"
+  role="article"
+>
+  <a class="x-post__avatar" th:href="@{${authorLink}}" th:aria-label="${authorName}">
+    <img
+      class="x-avatar x-avatar--40"
+      th:if="${not #strings.isEmpty(authorAvatar)}"
+      th:src="@{${authorAvatar}}"
+      th:alt="${authorName}"
+      loading="lazy"
+    />
+    <span class="x-avatar x-avatar--40 x-avatar--fallback" th:unless="${not #strings.isEmpty(authorAvatar)}" th:text="${initial}"></span>
+  </a>
+
+  <div class="x-post__body">
+    <header class="x-post__head">
+      <span class="x-post__badge" th:if="${post.spec.pinned}">
+        <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-bookmark"></use></svg>
+        <span>已置顶</span>
+      </span>
+      <a class="x-post__name" th:href="@{${authorLink}}">
+        <span th:text="${authorName}"></span>
+        <th:block th:replace="~{modules/verified :: badge(${authorHandle})}"></th:block>
+      </a>
+      <span class="x-post__handle" th:text="${'@' + authorHandle}"></span>
+      <span class="x-post__dot" aria-hidden="true">·</span>
+      <a class="x-post__time" th:href="@{${post.status.permalink}}">
+        <time th:attr="datetime=${post.spec.publishTime}" th:text="${post.spec.publishTime}"></time>
+      </a>
+      <span class="x-post__reading" th:if="${showReading}">
+        <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-clock"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-clock-f"></use></svg>
+        <span data-x-reading th:attr="data-text=${post.status.excerpt}">1 分钟</span>
+      </span>
+      <button class="x-post__more" type="button" th:attr="data-href=${post.status.permalink},aria-label='更多'" data-x-action="copy">
+        <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-more"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-more-f"></use></svg>
+      </button>
+    </header>
+
+    <div class="x-post__content">
+      <a class="x-post__title-link" th:href="@{${post.status.permalink}}">
+        <h3 class="x-post__title" th:text="${post.spec.title}"></h3>
+      </a>
+      <p
+        class="x-post__excerpt"
+        th:if="${not #strings.isEmpty(post.status.excerpt)}"
+        th:text="${post.status.excerpt}"
+      ></p>
+
+      <a
+        class="x-post__cover"
+        th:href="@{${post.status.permalink}}"
+        th:if="${showCover and not #strings.isEmpty(post.spec.cover)}"
+      >
+        <img th:src="@{${post.spec.cover}}" th:alt="${post.spec.title}" loading="lazy" />
+      </a>
+
+      <div class="x-post__topics" th:if="${post.tags != null and !#lists.isEmpty(post.tags)}">
+        <a
+          class="x-post__topic"
+          th:each="tag : ${post.tags}"
+          th:href="@{${tag.status.permalink}}"
+          th:text="${'#' + tag.spec.displayName}"
+        ></a>
+      </div>
+    </div>
+
+    <footer class="x-post__actions">
+      <a
+        class="x-action x-action--reply"
+        th:attr="href=${post.status.permalink + '#comments'},aria-label='回复'"
+      >
+        <span class="x-action__icon">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-reply"></use></svg>
+        </span>
+        <span
+          class="x-action__count"
+          th:if="${showStats and post.stats.comment > 0}"
+          th:text="${post.stats.comment}"
+        ></span>
+      </a>
+
+      <button
+        class="x-action x-action--repost"
+        type="button"
+        th:attr="data-href=${post.status.permalink},aria-label='复制链接'"
+        data-x-action="copy"
+      >
+        <span class="x-action__icon">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-repost"></use></svg>
+        </span>
+        <span class="x-action__count" th:if="${showStats and post.stats.visit > 0}" th:text="${post.stats.visit}"></span>
+      </button>
+
+      <button
+        class="x-action x-action--like"
+        type="button"
+        th:attr="data-post-name=${post.metadata.name},aria-label='点赞'"
+        data-x-action="like"
+        th:classappend="${theme.config.features?.enable_upvote != null and !theme.config.features.enable_upvote ? 'is-disabled' : ''}"
+      >
+        <span class="x-action__icon">
+          <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-heart"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-heart-f"></use></svg>
+        </span>
+        <span class="x-action__count" th:if="${showStats and post.stats.upvote > 0}" th:text="${post.stats.upvote}"></span>
+      </button>
+
+      <a
+        class="x-action x-action--views"
+        th:attr="href=${post.status.permalink},aria-label='浏览'"
+      >
+        <span class="x-action__icon">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-views"></use></svg>
+        </span>
+        <span class="x-action__count" th:text="${post.stats.visit}"></span>
+      </a>
+
+      <span class="x-action__spacer"></span>
+
+      <button class="x-action x-action--bookmark" type="button" aria-label="收藏" data-x-action="bookmark">
+        <span class="x-action__icon">
+          <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-bookmark"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-bookmark-f"></use></svg>
+        </span>
+      </button>
+
+      <button
+        class="x-action x-action--share"
+        type="button"
+        th:attr="data-href=${post.status.permalink},aria-label='分享'"
+        data-x-action="share"
+      >
+        <span class="x-action__icon">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-share"></use></svg>
+        </span>
+      </button>
+    </footer>
+  </div>
+</article>

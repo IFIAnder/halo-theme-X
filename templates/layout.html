@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:fragment="html (head, content)"
+  th:lang="${site.language ?: 'zh-CN'}"
+  th:attr="data-default-theme=${theme.config.appearance?.color_scheme ?: 'dark'},data-timeline-mode=${theme.config.appearance?.timeline_mode ?: 'comfortable'},data-round-media=${theme.config.appearance?.round_media == null or theme.config.appearance.round_media ? 'true' : 'false'},data-allow-switch=${theme.config.appearance?.allow_visitor_switch == true ? 'true' : 'false'}"
+  th:style="|--x-accent:${theme.config.appearance?.accent_color ?: '#1D9BF0'};--x-fs:${theme.config.appearance?.font_size ?: '15'}px;--x-bg-dark-set:${theme.config.appearance?.bg_dark ?: '#000000'};--x-bg-dim-set:${theme.config.appearance?.bg_dim ?: '#15202B'};--x-bg-light-set:${theme.config.appearance?.bg_light ?: '#FFFFFF'};|"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+
+    <!-- 页面布局契约：调用方未提供 head 时输出站点标题，避免出现两个 <title> -->
+    <title th:if="${head == null}" th:text="${site.title}"></title>
+    <th:block th:if="${head != null}">
+      <th:block th:replace="${head}"></th:block>
+    </th:block>
+
+    <link
+      rel="icon"
+      th:if="${not #strings.isEmpty(site.favicon)}"
+      th:href="@{${site.favicon}}"
+    />
+    <link rel="stylesheet" th:href="@{/assets/css/x.css(v=${theme.spec.version})}" />
+    <script>
+      /* 配色初始化：必须在样式表应用前跑完，避免闪白。
+         - data-theme 始终写「解析后的具体值」（dark / dim / light），CSS 只认这个
+         - data-preference 记录当前生效的偏好（可能是 system）
+
+         站长在主题设置里选的方案是唯一权威来源。只有站长显式打开
+         「允许访客自行切换配色」时，才认访客的本地偏好；而且这份本地偏好必须带上
+         「当前站点设置的指纹」，一旦站长改了设置就立刻作废 —— 否则访客会陷在某个
+         旧选择里，后台怎么改都不生效。
+
+         另外：早期版本把 light 标成「默认」，谁点一下就会把「覆盖成亮色」永久写进
+         localStorage，这就是「无论怎么设置都强制亮色」的来源。关闭开关时这里会
+         主动把历史脏数据清掉。 */
+      (function () {
+        var root = document.documentElement;
+
+        function resolve(scheme) {
+          if (scheme === 'system') {
+            try {
+              return window.matchMedia &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+            } catch (e) {
+              return 'dark';
+            }
+          }
+          return scheme === 'dim' || scheme === 'light' ? scheme : 'dark';
+        }
+
+        function clearOverride() {
+          try {
+            window.localStorage.removeItem('x-color-scheme');
+            window.localStorage.removeItem('x-color-scheme-stamp');
+            window.localStorage.removeItem('x-color-scheme-preset');
+          } catch (e) {}
+        }
+
+        var preset = root.getAttribute('data-default-theme') || 'dark';
+        var allowSwitch = root.getAttribute('data-allow-switch') === 'true';
+        var scheme = preset;
+
+        if (allowSwitch) {
+          try {
+            var saved = window.localStorage.getItem('x-color-scheme');
+            var stamp = window.localStorage.getItem('x-color-scheme-stamp');
+            if (saved && stamp === preset) scheme = saved;
+            else if (saved) clearOverride();
+          } catch (e) {}
+        } else {
+          clearOverride();
+        }
+
+        root.setAttribute('data-theme', resolve(scheme));
+        root.setAttribute('data-preference', scheme);
+
+        /* 系统配色变化时实时同步（仅当生效偏好是「跟随系统」） */
+        try {
+          window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+            if (root.getAttribute('data-preference') === 'system') {
+              root.setAttribute('data-theme', resolve('system'));
+            }
+          });
+        } catch (e) {}
+      })();
+    </script>
+    <script defer th:src="@{/assets/js/main.js(v=${theme.spec.version})}"></script>
+  </head>
+
+  <body>
+    <!-- ============ 图标库 ============ -->
+    <svg class="x-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <!-- 线条版（默认）与实心版（后缀 -f）拆成独立 symbol：
+           <use> 的内容在 shadow DOM 内，外部 CSS 无法选中，
+           因此状态切换由外层 <svg class="x-icon--o / x-icon--f"> 完成。 -->
+
+      <symbol id="i-x" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </symbol>
+
+      <!-- 主页 -->
+      <symbol id="i-home" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M3.3 9.15 12 3.35l8.7 5.8v9.55a2.1 2.1 0 0 1-2.1 2.1h-3.4v-6.6H8.8v6.6H5.4a2.1 2.1 0 0 1-2.1-2.1V9.15Z" />
+      </symbol>
+      <symbol id="i-home-f" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2.4 21.6 8.6v10.1a2.1 2.1 0 0 1-2.1 2.1H15v-7.2a1.1 1.1 0 0 0-1.1-1.1h-3.8a1.1 1.1 0 0 0-1.1 1.1v7.2H4.5a2.1 2.1 0 0 1-2.1-2.1V8.6L12 2.4Z" />
+      </symbol>
+
+      <!-- 探索（放大镜） -->
+      <symbol id="i-search" viewBox="0 0 24 24">
+        <circle cx="10.4" cy="10.4" r="6.6" fill="none" stroke="currentColor" stroke-width="1.9" />
+        <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="m15.5 15.5 4.4 4.4" />
+      </symbol>
+      <symbol id="i-search-f" viewBox="0 0 24 24">
+        <circle cx="10.4" cy="10.4" r="7.4" fill="currentColor" />
+        <path fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" d="m16 16 4.1 4.1" />
+      </symbol>
+
+      <!-- 话题（#） -->
+      <symbol id="i-hash" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M9.6 3.6 7.4 20.4M16.6 3.6l-2.2 16.8M3.8 8.7h16.4M3 15.3h16.4" />
+      </symbol>
+      <symbol id="i-hash-f" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M10.2 3h2.1l-.8 4.5h4.6l.8-4.5h2.1l-.8 4.5H21v2h-3.1l-.7 4H20v2h-3.1L16 20h-2.1l.8-4.5h-4.6L9.3 20H7.2l.8-4.5H5v-2h3.3l.7-4H6V7.5h3.4l.8-4.5Zm1.4 6.5-.7 4h4.6l.7-4h-4.6Z" />
+      </symbol>
+
+      <!-- 时间线（时钟） -->
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.9" fill="none" stroke="currentColor" stroke-width="1.9" />
+        <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M12 6.9V12l3.7 2.2" />
+      </symbol>
+      <symbol id="i-clock-f" viewBox="0 0 24 24">
+        <path fill="currentColor" fill-rule="evenodd" d="M12 2.6a9.4 9.4 0 1 0 0 18.8 9.4 9.4 0 0 0 0-18.8ZM11.2 6.6h1.6v5.6l3.8 2.2-.8 1.4-4.6-2.7V6.6Z" />
+      </symbol>
+
+      <!-- 搜索（星芒） -->
+      <symbol id="i-grok" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 3.4 13.86 9a1 1 0 0 0 .64.64L20.1 11.5l-5.6 1.86a1 1 0 0 0-.64.64L12 19.6l-1.86-5.6a1 1 0 0 0-.64-.64L3.9 11.5l5.6-1.86a1 1 0 0 0 .64-.64L12 3.4Z" />
+      </symbol>
+      <symbol id="i-grok-f" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 1.9 14.3 8.4a1.1 1.1 0 0 0 .7.7l6.5 2.3-6.5 2.3a1.1 1.1 0 0 0-.7.7L12 20.9l-2.3-6.5a1.1 1.1 0 0 0-.7-.7L2.5 11.4l6.5-2.3a1.1 1.1 0 0 0 .7-.7L12 1.9Z" />
+      </symbol>
+
+      <!-- 更多 -->
+      <symbol id="i-more" viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="1.8" fill="none" stroke="currentColor" stroke-width="1.8" />
+        <circle cx="12" cy="12" r="1.8" fill="none" stroke="currentColor" stroke-width="1.8" />
+        <circle cx="19" cy="12" r="1.8" fill="none" stroke="currentColor" stroke-width="1.8" />
+      </symbol>
+      <symbol id="i-more-f" viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="1.9" fill="currentColor" />
+        <circle cx="12" cy="12" r="1.9" fill="currentColor" />
+        <circle cx="19" cy="12" r="1.9" fill="currentColor" />
+      </symbol>
+
+      <!-- 点赞 -->
+      <symbol id="i-heart" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M12 20.2S4.1 15.4 4.1 10.3a4.5 4.5 0 0 1 4.5-4.5c1.6 0 3.03.87 3.4 2.1.37-1.23 1.8-2.1 3.4-2.1a4.5 4.5 0 0 1 4.5 4.5c0 5.1-7.9 9.9-7.9 9.9Z" />
+      </symbol>
+      <symbol id="i-heart-f" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z" />
+      </symbol>
+
+      <!-- 收藏 -->
+      <symbol id="i-bookmark" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" d="M5.2 5a2 2 0 0 1 2-2h9.6a2 2 0 0 1 2 2v15.6l-6.8-4.9-6.8 4.9V5Z" />
+      </symbol>
+      <symbol id="i-bookmark-f" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M4.2 4.9A2.7 2.7 0 0 1 6.9 2.2h10.2a2.7 2.7 0 0 1 2.7 2.7v16.4l-7.8-5.6-7.8 5.6V4.9Z" />
+      </symbol>
+
+      <!-- 以下为单一形态图标 -->
+      <symbol id="i-compose" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83ZM3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25Z" />
+      </symbol>
+
+      <symbol id="i-reply" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z" />
+      </symbol>
+
+      <symbol id="i-repost" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z" />
+      </symbol>
+
+      <symbol id="i-views" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z" />
+      </symbol>
+
+      <symbol id="i-share" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z" />
+      </symbol>
+
+      <!-- 认证徽章：齿轮状圆底 + 镂空对勾 -->
+      <symbol id="i-verified" viewBox="0 0 24 24">
+        <path fill="currentColor" fill-rule="evenodd" d="M12 1.4 15.58 3.36 19.5 4.5 20.64 8.42 22.6 12 20.64 15.58 19.5 19.5 15.58 20.64 12 22.6 8.42 20.64 4.5 19.5 3.36 15.58 1.4 12 3.36 8.42 4.5 4.5 8.42 3.36 12 1.4ZM9.94 16.42 6.5 12.98l1.42-1.42 2.02 2.02 5.24-5.6 1.48 1.38-6.72 7.06Z" />
+      </symbol>
+
+      <symbol id="i-back" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z" />
+      </symbol>
+
+      <symbol id="i-sparkle" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2.2 13.95 8.05a1 1 0 0 0 .64.66L20.4 10.6l-5.81 1.89a1 1 0 0 0-.64.66L12 18.99l-1.95-5.85a1 1 0 0 0-.64-.66L3.6 10.6l5.81-1.89a1 1 0 0 0 .64-.66L12 2.2Z" />
+        <path fill="currentColor" d="M18.9 2.1 19.6 4.3a.6.6 0 0 0 .4.4l2.2.7-2.2.7a.6.6 0 0 0-.4.4l-.7 2.2-.7-2.2a.6.6 0 0 0-.4-.4l-2.2-.7 2.2-.7a.6.6 0 0 0 .4-.4l.7-2.2Z" />
+      </symbol>
+
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 7.3a4.7 4.7 0 1 0 0 9.4 4.7 4.7 0 0 0 0-9.4Zm0 1.7a3 3 0 1 1 0 6 3 3 0 0 1 0-6ZM11.25 1.4h1.5v3.4h-1.5V1.4Zm0 17.8h1.5v3.4h-1.5v-3.4ZM1.4 11.25h3.4v1.5H1.4v-1.5Zm17.8 0h3.4v1.5h-3.4v-1.5ZM4.05 2.94l1.06-1.06 2.4 2.4-1.06 1.06-2.4-2.4Zm12.44 12.44 1.06-1.06 2.4 2.4-1.06 1.06-2.4-2.4Zm1.06-13.5 1.06 1.06-2.4 2.4-1.06-1.06 2.4-2.4ZM5.11 14.32l1.06 1.06-2.4 2.4-1.06-1.06 2.4-2.4Z" />
+      </symbol>
+
+      <symbol id="i-moon" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12.3 2A10 10 0 1 0 22 12.3 7.8 7.8 0 1 1 12.3 2Z" />
+      </symbol>
+
+      <symbol id="i-dim" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2v16a8 8 0 0 1 0-16Z" />
+      </symbol>
+
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M10.59 12 4.29 5.71l1.42-1.42L12 10.59l6.29-6.3 1.42 1.42L13.41 12l6.3 6.29-1.42 1.42L12 13.41l-6.29 6.3-1.42-1.42L10.59 12z" />
+      </symbol>
+
+      <symbol id="i-calendar" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M7 3v2H5.6A1.6 1.6 0 0 0 4 6.6v12.8A1.6 1.6 0 0 0 5.6 21h12.8a1.6 1.6 0 0 0 1.6-1.6V6.6A1.6 1.6 0 0 0 18.4 5H17V3h-1.6v2H8.6V3H7Zm11 6.2v10.2H6V9.2h12Z" />
+      </symbol>
+
+      <symbol id="i-image" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M3 5.6A2.6 2.6 0 0 1 5.6 3h12.8A2.6 2.6 0 0 1 21 5.6v12.8a2.6 2.6 0 0 1-2.6 2.6H5.6A2.6 2.6 0 0 1 3 18.4V5.6Zm2.6-1a1 1 0 0 0-1 1v7.13l3.9-3.9 5.6 5.6 2.4-2.4 3.9 3.9V5.6a1 1 0 0 0-1-1H5.6Zm14.8 13.66-4.6-4.6-2.4 2.4-5.6-5.6-3.2 3.2v.74a1 1 0 0 0 1 1h12.8a1 1 0 0 0 1-1ZM8.5 6.6a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8Z" />
+      </symbol>
+
+      <symbol id="i-community" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M9 2.9a4.2 4.2 0 1 0 0 8.4 4.2 4.2 0 0 0 0-8.4Zm0 2a2.2 2.2 0 1 1 0 4.4 2.2 2.2 0 0 1 0-4.4ZM9 13.3c-4.1 0-7.5 3-7.5 6.8v1.4h15v-1.4c0-3.8-3.4-6.8-7.5-6.8Zm0 2c3.1 0 5.5 2.2 5.5 4.8v.4h-11v-.4c0-2.6 2.4-4.8 5.5-4.8Zm6.9-11.8a.75.75 0 0 0 0 1.5 2.75 2.75 0 0 1 0 5.5.75.75 0 0 0 0 1.5 4.25 4.25 0 0 0 0-8.5Zm1.1 10.6a.75.75 0 0 0 0 1.5c1.9.5 3.2 2.2 3.2 4.15v1.35h-2v1.5h3.5v-2.85c0-2.75-1.9-5.1-4.7-5.65Z" />
+      </symbol>
+
+      <symbol id="i-profile" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2.2a4.7 4.7 0 1 0 0 9.4 4.7 4.7 0 0 0 0-9.4Zm0 2a2.7 2.7 0 1 1 0 5.4 2.7 2.7 0 0 1 0-5.4Zm0 9.3c-4.6 0-8.2 3.3-8.2 7.7v.7h16.4v-.7c0-4.4-3.6-7.7-8.2-7.7Zm0 2c3.6 0 6.2 2.4 6.2 5.7v.2H5.8v-.2c0-3.3 2.6-5.7 6.2-5.7Z" />
+      </symbol>
+    </svg>
+
+    <!-- ============ 应用骨架 ============ -->
+    <div class="x-app">
+      <th:block th:if="${theme.config.layout?.show_left_nav == null or theme.config.layout.show_left_nav}">
+        <div th:replace="~{modules/left-nav :: nav}"></div>
+      </th:block>
+
+      <main class="x-main">
+        <th:block th:replace="${content}"></th:block>
+      </main>
+
+      <th:block th:if="${theme.config.layout?.show_right_rail == null or theme.config.layout.show_right_rail}">
+        <div th:replace="~{modules/right-rail :: rail}"></div>
+      </th:block>
+    </div>
+
+    <!-- 移动端底部导航 -->
+    <th:block th:if="${theme.config.layout?.show_mobile_nav == null or theme.config.layout.show_mobile_nav}">
+      <div th:replace="~{modules/mobile-nav :: nav}"></div>
+
+    </th:block>
+
+    <!-- 瞬间投稿悬浮按钮（移动端右下角）
+         开启「站内直接发瞬间」时打开主题内的 X 风格弹层，否则退回跳转旧发布地址 -->
+    <th:block th:if="${theme.config.features?.enable_moment_publish == null or theme.config.features.enable_moment_publish}">
+      <th:block
+        th:with="publishUri=${theme.config.routes?.moment_publish_uri ?: '/uc/moments'},
+                 loginUri=${theme.config.routes?.login_uri ?: '/login'},
+                 inlineCompose=${theme.config.features?.enable_inline_compose == null or theme.config.features.enable_inline_compose}"
+      >
+        <th:block sec:authorize="isAuthenticated()">
+          <button
+            class="x-fab"
+            type="button"
+            th:if="${inlineCompose}"
+            data-x-modal-open="compose"
+            aria-label="发布瞬间"
+          >
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-compose"></use></svg>
+          </button>
+          <a
+            class="x-fab"
+            th:unless="${inlineCompose}"
+            th:href="@{${publishUri}}"
+            aria-label="发布瞬间"
+          >
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-compose"></use></svg>
+          </a>
+        </th:block>
+        <a class="x-fab" sec:authorize="isAnonymous()" th:href="@{${loginUri}(redirect_uri=${publishUri})}" aria-label="登录后发布瞬间">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-compose"></use></svg>
+        </a>
+      </th:block>
+    </th:block>
+
+    <!-- 站内发瞬间弹层（仅登录用户渲染） -->
+    <th:block th:if="${theme.config.features?.enable_moment_publish == null or theme.config.features.enable_moment_publish}">
+      <th:block sec:authorize="isAuthenticated()">
+        <th:block
+          th:with="me=${contributorFinder.getContributor(#authentication.name)},
+                   meName=${me != null and not #strings.isEmpty(me.displayName) ? me.displayName : #authentication.name},
+                   meAvatar=${me != null ? me.avatar : ''},
+                   meInitial=${#strings.isEmpty(meName) ? 'U' : #strings.substring(meName, 0, 1)}"
+        >
+          <div th:replace="~{modules/compose :: modal(${meAvatar}, ${meInitial}, ${meName})}"></div>
+        </th:block>
+      </th:block>
+    </th:block>
+
+    <footer class="x-site-footer">
+      <halo:footer />
+    </footer>
+  </body>
+</html>

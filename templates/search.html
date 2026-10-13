@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${'搜索 / ' + site.title}"></title>
+  </th:block>
+    <th:block th:fragment="content">
+      <header class="x-topbar">
+        <div class="x-topbar__row">
+          <a class="x-iconbtn" href="/" data-x-action="back" aria-label="返回">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-back"></use></svg>
+          </a>
+          <h1 class="x-topbar__title">搜索</h1>
+          <div th:replace="~{modules/account :: actions}"></div>
+        </div>
+        <form class="x-search x-search--inline" id="x-search-form" th:action="@{/search}" method="get" role="search">
+          <svg class="x-icon x-search__icon" viewBox="0 0 24 24"><use href="#i-search"></use></svg>
+          <input
+            class="x-search__input"
+            id="x-search-input"
+            type="search"
+            name="keyword"
+            placeholder="搜索帖子"
+            autocomplete="off"
+            autofocus
+          />
+          <button class="x-search__clear" type="reset" aria-label="清空">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-close"></use></svg>
+          </button>
+        </form>
+      </header>
+
+      <div class="x-search-status" id="x-search-status" hidden></div>
+
+      <div class="x-timeline" id="x-search-results" data-x-timeline></div>
+
+      <div class="x-search-hint" id="x-search-hint">
+        <div class="x-empty">
+          <h2>搜索帖子</h2>
+          <p>输入关键词，回车即可检索全文。</p>
+        </div>
+      </div>
+
+      <div class="x-empty" id="x-search-empty" hidden>
+        <h2>没有找到相关帖子</h2>
+        <p>换一个关键词试试吧。</p>
+      </div>
+
+      <div class="x-loadmore" id="x-search-error" hidden>
+        <p class="x-replies__empty">搜索服务暂时不可用，请稍后再试。</p>
+      </div>
+    </th:block>
+</html>

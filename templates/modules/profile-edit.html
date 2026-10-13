@@ -1,0 +1,77 @@
+<!--
+  个人资料编辑弹层（只给作者本人看）
+  ------------------------------------------------------------------
+  走 Halo 用户中心接口（/apis/** 免 CSRF）：
+  - PUT  /apis/uc.api.halo.run/v1alpha1/users/-          改「显示名 + 简介」
+  - POST /apis/uc.api.halo.run/v1alpha1/users/-/avatar   换头像（multipart，字段名固定 file）
+  注意：PUT 的可改字段只有 displayName / bio，用户名改不了，头像必须走上传接口。
+
+  参数：displayName / bio / avatar / initial / handle
+-->
+<div
+  class="x-modal"
+  th:fragment="modal(displayName, bio, avatar, initial, handle)"
+  data-x-modal="profile"
+  hidden
+>
+  <div class="x-modal__mask" data-x-modal-close></div>
+
+  <div class="x-modal__panel x-modal__panel--profile" role="dialog" aria-modal="true" aria-label="编辑个人资料">
+    <header class="x-modal__head">
+      <button class="x-iconbtn" type="button" data-x-modal-close aria-label="关闭">
+        <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-close"></use></svg>
+      </button>
+      <span class="x-modal__title">编辑个人资料</span>
+      <button class="x-btn x-btn--primary x-btn--sm" type="button" data-x-profile-save>保存</button>
+    </header>
+
+    <div class="x-modal__body">
+      <div class="x-edit__cover">
+        <div class="x-edit__cover-fallback"></div>
+        <label class="x-edit__avatar" title="更换头像">
+          <span class="x-edit__avatar-box" data-x-avatar-box>
+            <img
+              class="x-avatar x-avatar--96"
+              th:if="${not #strings.isEmpty(avatar)}"
+              th:src="@{${avatar}}"
+              th:alt="${displayName}"
+            />
+            <span
+              class="x-avatar x-avatar--96 x-avatar--fallback"
+              th:unless="${not #strings.isEmpty(avatar)}"
+              th:text="${initial}"
+            ></span>
+          </span>
+          <span class="x-edit__avatar-mask">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-image"></use></svg>
+          </span>
+          <input class="x-edit__file" type="file" accept="image/*" data-x-avatar-input aria-label="选择头像图片" />
+        </label>
+      </div>
+
+      <label class="x-field">
+        <span class="x-field__label">名称</span>
+        <input class="x-field__input" type="text" maxlength="40" th:value="${displayName}" data-x-profile-name />
+      </label>
+
+      <label class="x-field">
+        <span class="x-field__label">用户名</span>
+        <input class="x-field__input" type="text" th:value="${'@' + handle}" disabled />
+        <span class="x-field__note" th:text="${'用户名不可修改，它会出现在你的作者主页地址里。'}"></span>
+      </label>
+
+      <label class="x-field">
+        <span class="x-field__label">简介</span>
+        <textarea
+          class="x-field__input x-field__input--area"
+          rows="3"
+          maxlength="160"
+          data-x-profile-bio
+          th:text="${bio}"
+        ></textarea>
+      </label>
+
+      <p class="x-hint" data-x-profile-hint hidden></p>
+    </div>
+  </div>
+</div>

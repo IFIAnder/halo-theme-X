@@ -1,0 +1,72 @@
+<!--
+  顶栏账号区（所有页面共用）
+  - 未登录：登录 / 注册 入口
+  - 已登录：登录用户头像 + 昵称，点击进入个人中心
+  - 所有路由均可在主题设置里覆盖，避免硬编码不兼容
+-->
+<div
+  class="x-account-bar"
+  th:fragment="actions"
+  th:with="
+    loginUri=${theme.config.routes?.login_uri ?: '/login'},
+    signupUri=${theme.config.routes?.signup_uri ?: '/signup'},
+    ucUri=${theme.config.routes?.uc_uri ?: '/uc'},
+    authorsUri=${theme.config.routes?.authors_uri ?: '/authors'},
+    showLogin=${theme.config.routes?.show_login_entry == null or theme.config.routes.show_login_entry},
+    showSignup=${site.allowRegistration and (theme.config.routes?.show_signup_entry == null or theme.config.routes.show_signup_entry)}
+  "
+>
+  <!-- 未登录 -->
+  <th:block sec:authorize="isAnonymous()">
+    <th:block th:if="${showLogin}">
+      <a class="x-btn x-btn--primary x-btn--sm x-account-bar__cta" th:href="@{${loginUri}}">登录</a>
+      <a
+        class="x-btn x-btn--outline x-btn--sm x-account-bar__cta"
+        th:if="${showSignup}"
+        th:href="@{${signupUri}}"
+      >注册</a>
+    </th:block>
+  </th:block>
+
+  <!-- 已登录：当前用户 -->
+  <th:block sec:authorize="isAuthenticated()">
+    <th:block
+      th:with="me=${contributorFinder.getContributor(#authentication.name)},
+               meName=${me != null and not #strings.isEmpty(me.displayName) ? me.displayName : #authentication.name},
+               meHandle=${me != null and not #strings.isEmpty(me.name) ? me.name : #authentication.name},
+               meInitial=${#strings.isEmpty(meName) ? 'U' : #strings.substring(meName, 0, 1)}"
+    >
+      <a
+        class="x-avatar-btn"
+        th:href="@{${authorsUri + '/' + meHandle}}"
+        th:title="${meName}"
+        aria-label="我的主页"
+      >
+        <img
+          class="x-avatar x-avatar--32"
+          th:if="${me != null and not #strings.isEmpty(me.avatar)}"
+          th:src="@{${me.avatar}}"
+          th:alt="${meName}"
+        />
+        <span
+          class="x-avatar x-avatar--32 x-avatar--fallback"
+          th:unless="${me != null and not #strings.isEmpty(me.avatar)}"
+          th:text="${meInitial}"
+        ></span>
+        <span class="x-avatar-btn__name" th:text="${meName}"></span>
+      </a>
+    </th:block>
+  </th:block>
+
+  <!-- 配色方案切换：只有站长打开「允许访客自行切换配色」时才出现，
+       否则全站配色由主题设置说了算 -->
+  <button
+    class="x-iconbtn"
+    type="button"
+    th:if="${theme.config.appearance?.allow_visitor_switch == true}"
+    data-x-action="theme"
+    aria-label="切换配色方案"
+  >
+    <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-sun"></use></svg>
+  </button>
+</div>

@@ -1,0 +1,221 @@
+<nav
+  class="x-left__inner"
+  th:fragment="nav"
+  th:with="
+    avatarUrl=${theme.config.brand?.avatar ?: site.logo},
+    displayName=${#strings.isEmpty(theme.config.brand?.display_name) ? site.title : theme.config.brand.display_name},
+    handle=${#strings.isEmpty(theme.config.brand?.handle) ? #strings.toLowerCase(#strings.replace(site.title, ' ', '')) : theme.config.brand.handle},
+    initial=${#strings.isEmpty(displayName) ? 'H' : #strings.substring(displayName, 0, 1)},
+    loginUri=${theme.config.routes?.login_uri ?: '/login'},
+    signupUri=${theme.config.routes?.signup_uri ?: '/signup'},
+    ucUri=${theme.config.routes?.uc_uri ?: '/uc'},
+    authorsUri=${theme.config.routes?.authors_uri ?: '/authors'},
+    momentsUri=${theme.config.routes?.moments_uri ?: '/moments'},
+    showLogin=${theme.config.routes?.show_login_entry == null or theme.config.routes.show_login_entry},
+    showSignup=${site.allowRegistration and (theme.config.routes?.show_signup_entry == null or theme.config.routes.show_signup_entry)},
+    logoType=${theme.config.brand?.logo_type ?: 'x'},
+    logoImage=${theme.config.brand?.logo_image},
+    logoText=${#strings.isEmpty(theme.config.brand?.logo_text) ? site.title : theme.config.brand.logo_text},
+    logoSubtitle=${theme.config.brand?.logo_subtitle},
+    navHome=${theme.config.navigation?.nav_home ?: 'main'},
+    navMoments=${theme.config.navigation?.nav_moments ?: 'main'},
+    navExplore=${theme.config.navigation?.nav_explore ?: 'main'},
+    navTopics=${theme.config.navigation?.nav_topics ?: 'main'},
+    navTimeline=${theme.config.navigation?.nav_timeline ?: 'main'},
+    navSearch=${theme.config.navigation?.nav_search ?: 'main'},
+    showMoreNav=${theme.config.navigation?.show_more_nav == null or theme.config.navigation.show_more_nav},
+    customNav=${theme.config.navigation?.custom_nav},
+    hasCustomNav=${customNav != null and !#lists.isEmpty(customNav)},
+    hasMoreItems=${navHome == 'more' or navMoments == 'more' or navExplore == 'more' or navTopics == 'more' or navTimeline == 'more' or navSearch == 'more' or hasCustomNav},
+    showMomentsNav=${theme.config.features?.show_moments_nav == null or theme.config.features.show_moments_nav},
+    showSearchNav=${theme.config.features?.enable_search == null or theme.config.features.enable_search}
+  "
+  aria-label="主导航"
+>
+  <!-- 站点标识：X Logo / 自定义图片 / 文字（可带副标题） -->
+  <a
+    class="x-logo"
+    th:classappend="${logoType == 'text' ? 'x-logo--text' : ''}"
+    th:href="@{/}"
+    th:aria-label="${logoText}"
+  >
+    <th:block th:if="${logoType == 'text'}">
+      <span class="x-logo__text">
+        <span class="x-logo__main" th:text="${logoText}"></span>
+        <span
+          class="x-logo__sub"
+          th:if="${not #strings.isEmpty(logoSubtitle)}"
+          th:text="${logoSubtitle}"
+        ></span>
+      </span>
+    </th:block>
+    <th:block th:unless="${logoType == 'text'}">
+      <img
+        class="x-logo__img"
+        th:if="${logoType == 'image' and not #strings.isEmpty(logoImage)}"
+        th:src="@{${logoImage}}"
+        th:alt="${logoText}"
+      />
+      <svg
+        class="x-icon"
+        th:if="${logoType == 'x' or (logoType == 'image' and #strings.isEmpty(logoImage))}"
+        viewBox="0 0 24 24"
+      ><use href="#i-x"></use></svg>
+    </th:block>
+  </a>
+
+  <ul class="x-nav">
+    <li th:if="${navHome == 'main'}">
+      <a class="x-nav__item" th:href="@{/}" data-nav="home">
+        <span class="x-nav__icon">
+          <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-home"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-home-f"></use></svg>
+        </span>
+        <span class="x-nav__label">主页</span>
+      </a>
+    </li>
+    <li th:if="${navMoments == 'main' and showMomentsNav}">
+      <a class="x-nav__item" th:href="@{${momentsUri}}" data-nav="moments">
+        <span class="x-nav__icon">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-sparkle"></use></svg>
+        </span>
+        <span class="x-nav__label">瞬间</span>
+      </a>
+    </li>
+    <li th:if="${navExplore == 'main'}">
+      <a class="x-nav__item" th:href="@{${site.routes?.categoriesUri ?: '/categories'}}" data-nav="explore">
+        <span class="x-nav__icon">
+          <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-search"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-search-f"></use></svg>
+        </span>
+        <span class="x-nav__label">探索</span>
+      </a>
+    </li>
+    <li th:if="${navTopics == 'main'}">
+      <a class="x-nav__item" th:href="@{${site.routes?.tagsUri ?: '/tags'}}" data-nav="topics">
+        <span class="x-nav__icon">
+          <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-hash"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-hash-f"></use></svg>
+        </span>
+        <span class="x-nav__label">话题</span>
+      </a>
+    </li>
+    <li th:if="${navTimeline == 'main'}">
+      <a class="x-nav__item" th:href="@{${site.routes?.archivesUri ?: '/archives'}}" data-nav="timeline">
+        <span class="x-nav__icon">
+          <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-clock"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-clock-f"></use></svg>
+        </span>
+        <span class="x-nav__label">时间线</span>
+      </a>
+    </li>
+    <li th:if="${navSearch == 'main' and showSearchNav}">
+      <a class="x-nav__item" th:href="@{/search}" data-nav="search">
+        <span class="x-nav__icon">
+          <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-grok"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-grok-f"></use></svg>
+        </span>
+        <span class="x-nav__label">搜索</span>
+      </a>
+    </li>
+    <!-- 自定义导航项（常驻） -->
+    <th:block th:if="${hasCustomNav}">
+      <li
+        th:each="cn : ${customNav}"
+        th:if="${cn.pos == 'main' and cn.label != null and cn.label != '' and cn.url != null and cn.url != ''}"
+      >
+        <a
+          class="x-nav__item"
+          th:href="@{${cn.url}}"
+          th:target="${#strings.startsWith(cn.url, 'http') ? '_blank' : null}"
+          th:rel="${#strings.startsWith(cn.url, 'http') ? 'noopener' : null}"
+        >
+          <span class="x-nav__icon">
+            <svg class="x-icon" viewBox="0 0 24 24"><use th:href="${'#' + (cn.icon != null and cn.icon != '' ? cn.icon : 'i-hash')}"></use></svg>
+          </span>
+          <span class="x-nav__label" th:text="${cn.label}"></span>
+        </a>
+      </li>
+    </th:block>
+
+    <li th:if="${hasMoreItems and showMoreNav}">
+      <button class="x-nav__item" type="button" data-x-action="nav-more" data-nav="more">
+        <span class="x-nav__icon">
+          <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-more"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-more-f"></use></svg>
+        </span>
+        <span class="x-nav__label">更多</span>
+      </button>
+
+      <!-- 被折叠进「更多」的导航项 -->
+      <div class="x-nav-more" data-x-nav-more hidden>
+        <a class="x-nav-more__item" th:if="${navHome == 'more'}" th:href="@{/}">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-home"></use></svg><span>主页</span>
+        </a>
+        <a class="x-nav-more__item" th:if="${navMoments == 'more' and showMomentsNav}" th:href="@{${momentsUri}}">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-sparkle"></use></svg><span>瞬间</span>
+        </a>
+        <a class="x-nav-more__item" th:if="${navExplore == 'more'}" th:href="@{${site.routes?.categoriesUri ?: '/categories'}}">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-search"></use></svg><span>探索</span>
+        </a>
+        <a class="x-nav-more__item" th:if="${navTopics == 'more'}" th:href="@{${site.routes?.tagsUri ?: '/tags'}}">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-hash"></use></svg><span>话题</span>
+        </a>
+        <a class="x-nav-more__item" th:if="${navTimeline == 'more'}" th:href="@{${site.routes?.archivesUri ?: '/archives'}}">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-clock"></use></svg><span>时间线</span>
+        </a>
+        <a class="x-nav-more__item" th:if="${navSearch == 'more' and showSearchNav}" th:href="@{/search}">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-grok"></use></svg><span>搜索</span>
+        </a>
+
+        <!-- 自定义导航项（折叠） -->
+        <th:block th:if="${hasCustomNav}">
+          <a
+            class="x-nav-more__item"
+            th:each="cn : ${customNav}"
+            th:if="${cn.pos == 'more' and cn.label != null and cn.label != '' and cn.url != null and cn.url != ''}"
+            th:href="@{${cn.url}}"
+            th:target="${#strings.startsWith(cn.url, 'http') ? '_blank' : null}"
+            th:rel="${#strings.startsWith(cn.url, 'http') ? 'noopener' : null}"
+          >
+            <svg class="x-icon" viewBox="0 0 24 24"><use th:href="${'#' + (cn.icon != null and cn.icon != '' ? cn.icon : 'i-hash')}"></use></svg>
+            <span th:text="${cn.label}"></span>
+          </a>
+        </th:block>
+      </div>
+    </li>
+  </ul>
+
+  <!-- 已登录：显示当前登录用户 -->
+  <th:block sec:authorize="isAuthenticated()">
+    <th:block
+      th:with="me=${contributorFinder.getContributor(#authentication.name)},
+               meName=${me != null and not #strings.isEmpty(me.displayName) ? me.displayName : #authentication.name},
+               meHandle=${me != null and not #strings.isEmpty(me.name) ? me.name : #authentication.name},
+               meAvatar=${me != null ? me.avatar : ''},
+               meInitial=${#strings.isEmpty(meName) ? 'U' : #strings.substring(meName, 0, 1)}"
+    >
+      <a class="x-account" th:href="@{${authorsUri + '/' + meHandle}}" th:title="${meName}">
+        <img
+          class="x-avatar x-avatar--40"
+          th:if="${not #strings.isEmpty(meAvatar)}"
+          th:src="@{${meAvatar}}"
+          th:alt="${meName}"
+          loading="lazy"
+        />
+        <span class="x-avatar x-avatar--40 x-avatar--fallback" th:unless="${not #strings.isEmpty(meAvatar)}" th:text="${meInitial}"></span>
+        <span class="x-account__meta">
+          <span class="x-account__name" th:text="${meName}"></span>
+          <span class="x-account__handle" th:text="${'@' + meHandle}"></span>
+        </span>
+        <svg class="x-icon x-account__more" viewBox="0 0 24 24"><use href="#i-more"></use></svg>
+      </a>
+    </th:block>
+  </th:block>
+
+  <!-- 未登录：登录 / 注册入口 -->
+  <th:block sec:authorize="isAnonymous()">
+    <div class="x-account-actions" th:if="${showLogin}">
+      <a class="x-btn x-btn--primary x-account-actions__btn" th:href="@{${loginUri}}">登录</a>
+      <a
+        class="x-btn x-btn--outline x-account-actions__btn"
+        th:if="${showSignup}"
+        th:href="@{${signupUri}}"
+      >注册</a>
+    </div>
+  </th:block>
+</nav>

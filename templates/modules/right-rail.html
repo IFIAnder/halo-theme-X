@@ -1,0 +1,124 @@
+<div
+  class="x-rail__inner"
+  th:fragment="rail"
+  th:with="
+    avatarUrl=${theme.config.brand?.avatar ?: site.logo},
+    displayName=${#strings.isEmpty(theme.config.brand?.display_name) ? site.title : theme.config.brand.display_name},
+    handle=${#strings.isEmpty(theme.config.brand?.handle) ? #strings.toLowerCase(#strings.replace(site.title, ' ', '')) : theme.config.brand.handle},
+    bio=${#strings.isEmpty(theme.config.brand?.bio) ? (site.subtitle ?: '') : theme.config.brand.bio},
+    initial=${#strings.isEmpty(displayName) ? 'H' : #strings.substring(displayName, 0, 1)},
+    ucUri=${theme.config.routes?.uc_uri ?: '/uc'},
+    authorsUri=${theme.config.routes?.authors_uri ?: '/authors'},
+    allTags=${tagFinder.listAll()}
+  "
+>
+  <div class="x-rail__sticky">
+    <!-- 搜索 -->
+    <form
+      class="x-search"
+      th:action="@{/search}"
+      method="get"
+      role="search"
+      th:if="${theme.config.features?.enable_search == null or theme.config.features.enable_search}"
+    >
+      <svg class="x-icon x-search__icon" viewBox="0 0 24 24"><use href="#i-search"></use></svg>
+      <input
+        class="x-search__input"
+        type="search"
+        name="keyword"
+        placeholder="搜索"
+        autocomplete="off"
+        aria-label="搜索"
+      />
+      <button class="x-search__clear" type="reset" aria-label="清空">
+        <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-close"></use></svg>
+      </button>
+    </form>
+
+    <!-- 账号卡片 -->
+    <section class="x-card x-card--account">
+      <!-- 已登录：展示当前登录用户 -->
+      <th:block sec:authorize="isAuthenticated()">
+        <th:block
+          th:with="me=${contributorFinder.getContributor(#authentication.name)},
+                   meName=${me != null and not #strings.isEmpty(me.displayName) ? me.displayName : #authentication.name},
+                   meHandle=${me != null and not #strings.isEmpty(me.name) ? me.name : #authentication.name},
+                   meAvatar=${me != null ? me.avatar : ''},
+                   meBio=${me != null ? me.bio : ''},
+                   meInitial=${#strings.isEmpty(meName) ? 'U' : #strings.substring(meName, 0, 1)}"
+        >
+          <div class="x-follow">
+            <img
+              class="x-avatar x-avatar--40"
+              th:if="${not #strings.isEmpty(meAvatar)}"
+              th:src="@{${meAvatar}}"
+              th:alt="${meName}"
+              loading="lazy"
+            />
+            <span class="x-avatar x-avatar--40 x-avatar--fallback" th:unless="${not #strings.isEmpty(meAvatar)}" th:text="${meInitial}"></span>
+            <div class="x-follow__meta">
+              <span class="x-follow__name">
+                <a th:href="@{${authorsUri + '/' + meHandle}}" th:text="${meName}"></a>
+                <th:block th:replace="~{modules/verified :: badge(${meHandle})}"></th:block>
+              </span>
+              <span class="x-follow__handle" th:text="${'@' + meHandle}"></span>
+            </div>
+            <a class="x-btn x-btn--outline x-follow__btn" th:href="@{${ucUri}}">个人中心</a>
+          </div>
+          <p
+            class="x-card__text"
+            th:if="${meBio != null and not #strings.isEmpty(meBio)}"
+            th:text="${meBio}"
+          ></p>
+        </th:block>
+      </th:block>
+
+      <!-- 未登录：展示站点所有者 -->
+      <th:block sec:authorize="isAnonymous()">
+        <div class="x-follow">
+          <img
+            class="x-avatar x-avatar--40"
+            th:if="${not #strings.isEmpty(avatarUrl)}"
+            th:src="@{${avatarUrl}}"
+            th:alt="${displayName}"
+            loading="lazy"
+          />
+          <span class="x-avatar x-avatar--40 x-avatar--fallback" th:unless="${not #strings.isEmpty(avatarUrl)}" th:text="${initial}"></span>
+          <div class="x-follow__meta">
+            <span class="x-follow__name">
+              <span th:text="${displayName}"></span>
+              <th:block th:replace="~{modules/verified :: badge(${handle})}"></th:block>
+            </span>
+            <span class="x-follow__handle" th:text="${'@' + handle}"></span>
+          </div>
+          <a class="x-btn x-btn--outline x-follow__btn" th:href="@{/rss.xml}" target="_blank" rel="noopener">订阅</a>
+        </div>
+        <p class="x-card__text" th:if="${not #strings.isEmpty(bio)}" th:text="${bio}"></p>
+      </th:block>
+
+      <div class="x-account-links">
+        <a th:href="@{${site.routes?.archivesUri ?: '/archives'}}">时间线</a>
+        <a th:href="@{${site.routes?.categoriesUri ?: '/categories'}}">分类</a>
+        <a th:href="@{${site.routes?.tagsUri ?: '/tags'}}">标签</a>
+        <a th:href="@{/rss.xml}" target="_blank" rel="noopener">RSS</a>
+      </div>
+    </section>
+
+    <!-- 正在发生 -->
+    <th:block th:if="${theme.config.features?.enable_trends == null or theme.config.features.enable_trends}">
+      <section class="x-card" th:if="${allTags != null and !#lists.isEmpty(allTags)}">
+        <h2 class="x-card__title">正在发生</h2>
+        <ul class="x-trends">
+          <li class="x-trends__item" th:each="tag, iter : ${allTags}" th:if="${iter.index < 5}">
+            <a class="x-trends__link" th:href="@{${tag.status.permalink}}">
+              <span class="x-trends__meta">话题 · 博客</span>
+              <span class="x-trends__name" th:text="${'#' + tag.spec.displayName}"></span>
+              <span class="x-trends__count" th:text="${tag.postCount + ' 篇帖子'}"></span>
+            </a>
+          </li>
+        </ul>
+        <a class="x-card__more" th:href="@{${site.routes?.tagsUri ?: '/tags'}}">显示更多</a>
+      </section>
+    </th:block>
+  </div>
+</div>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${'出错了 / ' + site.title}"></title>
+  </th:block>
+    <th:block th:fragment="content">
+      <div class="x-error">
+        <div class="x-error__code" th:text="${error != null and error.status != null ? error.status : 500}">500</div>
+        <h1 class="x-error__title" th:text="${error != null and not #strings.isEmpty(error.title) ? error.title : '服务器开小差了'}">
+          服务器开小差了
+        </h1>
+        <p class="x-error__desc" th:if="${error != null and not #strings.isEmpty(error.detail)}" th:text="${error.detail}">
+          页面加载失败，请稍后重试。
+        </p>
+        <p class="x-error__desc" th:unless="${error != null and not #strings.isEmpty(error.detail)}">
+          页面加载失败，请稍后重试。
+        </p>
+        <a class="x-btn x-btn--primary" th:href="@{/}">回到主页</a>
+      </div>
+    </th:block>
+</html>

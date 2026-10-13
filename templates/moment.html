@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${'瞬间 / ' + site.title}"></title>
+  </th:block>
+  <th:block
+    th:fragment="content"
+    th:with="
+      owner=${moment.owner},
+      authorName=${owner != null ? owner.displayName : '匿名作者'},
+      authorHandle=${owner != null and not #strings.isEmpty(owner.name) ? owner.name : 'unknown'},
+      authorAvatar=${owner != null ? owner.avatar : ''},
+      authorBio=${owner != null ? owner.bio : ''},
+      initial=${#strings.isEmpty(authorName) ? 'A' : #strings.substring(authorName, 0, 1)},
+      media=${moment.spec.content != null ? moment.spec.content.medium : null},
+      tags=${moment.spec.tags},
+      momentsUri=${theme.config.routes?.moments_uri ?: '/moments'},
+      authorsUri=${theme.config.routes?.authors_uri ?: '/authors'},
+      detailUrl=${momentsUri + '/' + moment.metadata.name},
+      showStats=${theme.config.features?.show_stats == null or theme.config.features.show_stats}
+    "
+  >
+    <header class="x-topbar x-topbar--detail">
+      <div class="x-topbar__row">
+        <a class="x-iconbtn" th:href="@{${momentsUri}}" aria-label="返回">
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-back"></use></svg>
+        </a>
+        <h1 class="x-topbar__title">瞬间</h1>
+        <div th:replace="~{modules/account :: actions}"></div>
+      </div>
+    </header>
+
+    <article class="x-detail x-detail--moment" th:attr="data-moment-name=${moment.metadata.name}">
+      <header class="x-detail__head">
+        <a class="x-post__avatar" th:href="@{${authorsUri + '/' + authorHandle}}">
+          <img
+            class="x-avatar x-avatar--40"
+            th:if="${not #strings.isEmpty(authorAvatar)}"
+            th:src="@{${authorAvatar}}"
+            th:alt="${authorName}"
+          />
+          <span class="x-avatar x-avatar--40 x-avatar--fallback" th:unless="${not #strings.isEmpty(authorAvatar)}" th:text="${initial}"></span>
+        </a>
+        <div class="x-detail__head-meta">
+          <a class="x-post__name" th:href="@{${authorsUri + '/' + authorHandle}}">
+            <span th:text="${authorName}"></span>
+            <th:block th:replace="~{modules/verified :: badge(${authorHandle})}"></th:block>
+          </a>
+          <span class="x-post__handle" th:text="${'@' + authorHandle}"></span>
+        </div>
+        <button class="x-post__more" type="button" data-x-action="copy" th:attr="data-href=${detailUrl}" aria-label="更多">
+          <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-more"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-more-f"></use></svg>
+        </button>
+      </header>
+
+      <div
+        class="x-detail__content x-prose x-prose--moment"
+        th:if="${moment.spec.content != null and not #strings.isEmpty(moment.spec.content.html)}"
+        th:utext="${moment.spec.content.html}"
+      ></div>
+
+      <div
+        class="x-media x-media--detail"
+        th:if="${media != null and !#lists.isEmpty(media)}"
+        th:classappend="${#lists.size(media) > 1 ? 'x-media--grid' : ''}"
+      >
+        <th:block th:each="item : ${media}">
+          <img
+            class="x-media__item"
+            th:if="${item.type.name == 'PHOTO'}"
+            th:src="${item.url}"
+            th:alt="${authorName}"
+            loading="lazy"
+          />
+          <video
+            class="x-media__item"
+            th:if="${item.type.name == 'VIDEO'}"
+            th:src="${item.url}"
+            controls
+          ></video>
+          <audio
+            class="x-media__audio"
+            th:if="${item.type.name == 'AUDIO'}"
+            th:src="${item.url}"
+            controls
+          ></audio>
+          <a class="x-media__link" th:if="${item.type.name == 'POST'}" th:href="@{${item.url}}">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-image"></use></svg>
+            <span>阅读关联文章</span>
+          </a>
+        </th:block>
+      </div>
+
+      <div class="x-detail__topics" th:if="${tags != null and !#lists.isEmpty(tags)}">
+        <a
+          class="x-post__topic"
+          th:each="tag : ${tags}"
+          th:href="@{${momentsUri}(tag=${tag})}"
+          th:text="${'#' + tag}"
+        ></a>
+      </div>
+
+      <div class="x-detail__meta">
+        <time th:attr="datetime=${moment.spec.releaseTime}" th:text="${moment.spec.releaseTime}"></time>
+        <span th:if="${showStats and moment.stats != null and moment.stats.upvote > 0}">
+          <span aria-hidden="true">·</span>
+          <span th:text="${moment.stats.upvote + ' 次点赞'}"></span>
+        </span>
+        <span th:if="${showStats and moment.stats != null and moment.stats.totalComment > 0}">
+          <span aria-hidden="true">·</span>
+          <span th:text="${moment.stats.totalComment + ' 条回复'}"></span>
+        </span>
+      </div>
+
+      <footer class="x-detail__actions">
+        <a class="x-action x-action--reply" href="#comments" aria-label="回复">
+          <span class="x-action__icon">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-reply"></use></svg>
+          </span>
+          <span
+            class="x-action__count"
+            th:if="${showStats and moment.stats != null and moment.stats.totalComment > 0}"
+            th:text="${moment.stats.totalComment}"
+          ></span>
+        </a>
+        <button
+          class="x-action x-action--repost"
+          type="button"
+          th:attr="data-href=${detailUrl},aria-label='复制链接'"
+          data-x-action="copy"
+        >
+          <span class="x-action__icon">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-repost"></use></svg>
+          </span>
+        </button>
+        <button
+          class="x-action x-action--like"
+          type="button"
+          th:attr="data-moment-name=${moment.metadata.name},aria-label='点赞'"
+          data-x-action="moment-like"
+        >
+          <span class="x-action__icon">
+            <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-heart"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-heart-f"></use></svg>
+          </span>
+          <span
+            class="x-action__count"
+            th:if="${showStats and moment.stats != null and moment.stats.upvote > 0}"
+            th:text="${moment.stats.upvote}"
+          ></span>
+        </button>
+        <a class="x-action x-action--views" th:href="@{${momentsUri}}" aria-label="返回列表">
+          <span class="x-action__icon">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-views"></use></svg>
+          </span>
+        </a>
+        <span class="x-action__spacer"></span>
+        <button class="x-action x-action--bookmark" type="button" data-x-action="bookmark" aria-label="收藏">
+          <span class="x-action__icon">
+            <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-bookmark"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-bookmark-f"></use></svg>
+          </span>
+        </button>
+        <button
+          class="x-action x-action--share"
+          type="button"
+          th:attr="data-href=${detailUrl},aria-label='分享'"
+          data-x-action="share"
+        >
+          <span class="x-action__icon">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-share"></use></svg>
+          </span>
+        </button>
+      </footer>
+    </article>
+
+    <section class="x-replies" id="comments">
+      <h2 class="x-replies__title">回复</h2>
+      <div class="x-replies__body">
+        <th:block th:if="${theme.config.features?.enable_comment == null or theme.config.features.enable_comment}">
+          <th:block th:if="${haloCommentEnabled}">
+            <halo:comment
+              th:attr="group=${theme.config.features?.moment_comment_group ?: 'moment.halo.run'},kind=${theme.config.features?.moment_comment_kind ?: 'Moment'},name=${moment.metadata.name}"
+            />
+          </th:block>
+          <p class="x-replies__empty" th:unless="${haloCommentEnabled}">
+            当前没有可用的评论组件。瞬间的回复需要评论插件支持 <code>moment.halo.run / Moment</code> 这个评论主体。
+          </p>
+        </th:block>
+      </div>
+    </section>
+  </th:block>
+</html>

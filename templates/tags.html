@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${'话题 / ' + site.title}"></title>
+  </th:block>
+    <th:block th:fragment="content">
+      <header class="x-topbar">
+        <div class="x-topbar__row">
+          <h1 class="x-topbar__title">话题</h1>
+          <div th:replace="~{modules/account :: actions}"></div>
+        </div>
+        <form class="x-search x-search--inline" th:action="@{/search}" method="get" role="search">
+          <svg class="x-icon x-search__icon" viewBox="0 0 24 24"><use href="#i-search"></use></svg>
+          <input class="x-search__input" type="search" name="keyword" placeholder="搜索话题" autocomplete="off" />
+        </form>
+      </header>
+
+      <section class="x-grid">
+        <a class="x-grid__item" th:each="tag : ${tags}" th:href="@{${tag.status.permalink}}">
+          <span class="x-grid__cover" th:if="${not #strings.isEmpty(tag.spec.cover)}">
+            <img th:src="@{${tag.spec.cover}}" th:alt="${tag.spec.displayName}" loading="lazy" />
+          </span>
+          <span class="x-grid__cover x-grid__cover--hash" th:unless="${not #strings.isEmpty(tag.spec.cover)}">
+            <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-hash"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-hash-f"></use></svg>
+          </span>
+          <span class="x-grid__body">
+            <span class="x-grid__name" th:text="${'#' + tag.spec.displayName}"></span>
+            <span class="x-grid__count" th:text="${tag.postCount + ' 篇帖子'}"></span>
+          </span>
+        </a>
+      </section>
+
+      <div class="x-empty" th:if="${tags == null or #lists.isEmpty(tags)}">
+        <h2>还没有话题</h2>
+        <p>给文章添加标签，它们会自动出现在这里。</p>
+      </div>
+    </th:block>
+</html>

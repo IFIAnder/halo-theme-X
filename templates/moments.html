@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${'瞬间 / ' + site.title}"></title>
+  </th:block>
+  <th:block th:fragment="content" th:with="momentsUri=${theme.config.routes?.moments_uri ?: '/moments'}">
+    <header class="x-topbar">
+      <div class="x-topbar__row">
+        <h1 class="x-topbar__title">瞬间</h1>
+        <div th:replace="~{modules/account :: actions}"></div>
+      </div>
+      <nav class="x-tabs" th:if="${tags != null and !#lists.isEmpty(tags)}">
+        <a
+          class="x-tab"
+          th:href="@{${momentsUri}}"
+          th:classappend="${param.tag == null or #lists.isEmpty(param.tag) ? 'is-active' : ''}"
+        >全部</a>
+        <a
+          class="x-tab"
+          th:each="tag : ${tags}"
+          th:href="@{${momentsUri}(tag=${tag.name})}"
+          th:classappend="${param.tag != null and #lists.contains(param.tag, tag.name) ? 'is-active' : ''}"
+          th:text="${'#' + tag.name}"
+        ></a>
+      </nav>
+    </header>
+
+    <div class="x-timeline" data-x-timeline>
+      <th:block th:each="moment : ${moments.items}">
+        <div th:replace="~{modules/moment-card :: card(${moment})}"></div>
+      </th:block>
+    </div>
+
+    <div class="x-empty" th:if="${moments.items == null or #lists.isEmpty(moments.items)}">
+      <h2>这里还没有瞬间</h2>
+      <p>在后台的「瞬间」里发一条，它就会出现在这里。</p>
+    </div>
+
+    <div class="x-loadmore" th:if="${moments.hasPrevious() or moments.hasNext()}">
+      <a class="x-btn x-btn--outline" th:if="${moments.hasPrevious()}" th:href="@{${moments.prevUrl}}">上一页</a>
+      <span class="x-loadmore__page" th:text="${moments.page + ' / ' + moments.totalPages}"></span>
+      <a class="x-btn x-btn--outline" th:if="${moments.hasNext()}" th:href="@{${moments.nextUrl}}">下一页</a>
+    </div>
+  </th:block>
+</html>

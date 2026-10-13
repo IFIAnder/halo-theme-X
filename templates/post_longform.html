@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${post.spec.title}"></title>
+  </th:block>
+    <th:block
+      th:fragment="content"
+      th:with="
+        author=${post.owner},
+        authorName=${author != null ? author.displayName : '匿名作者'},
+        authorHandle=${author != null and not #strings.isEmpty(author.name) ? author.name : 'unknown'},
+        authorAvatar=${author != null ? author.avatar : ''},
+        authorLink=${author != null and not #strings.isEmpty(author.permalink) ? author.permalink : '#'},
+        initial=${#strings.isEmpty(authorName) ? 'A' : #strings.substring(authorName, 0, 1)}
+      "
+    >
+      <header class="x-topbar x-topbar--detail">
+        <div class="x-topbar__row">
+          <a class="x-iconbtn" href="/" data-x-action="back" aria-label="返回">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-back"></use></svg>
+          </a>
+          <h1 class="x-topbar__title">长推文</h1>
+          <div th:replace="~{modules/account :: actions}"></div>
+        </div>
+      </header>
+
+      <article class="x-detail x-detail--longform" th:attr="data-post-name=${post.metadata.name}">
+        <header class="x-detail__head">
+          <a class="x-post__avatar" th:href="@{${authorLink}}">
+            <img
+              class="x-avatar x-avatar--40"
+              th:if="${not #strings.isEmpty(authorAvatar)}"
+              th:src="@{${authorAvatar}}"
+              th:alt="${authorName}"
+            />
+            <span class="x-avatar x-avatar--40 x-avatar--fallback" th:unless="${not #strings.isEmpty(authorAvatar)}" th:text="${initial}"></span>
+          </a>
+          <div class="x-detail__head-meta">
+            <a class="x-post__name" th:href="@{${authorLink}}">
+              <span th:text="${authorName}"></span>
+              <th:block th:replace="~{modules/verified :: badge(${authorHandle})}"></th:block>
+            </a>
+            <span class="x-post__handle" th:text="${'@' + authorHandle}"></span>
+          </div>
+        </header>
+
+        <h1 class="x-detail__title" th:text="${post.spec.title}"></h1>
+        <div class="x-detail__content x-prose x-prose--longform" th:utext="${post.content.content}"></div>
+
+        <div class="x-detail__meta">
+          <time th:attr="datetime=${post.spec.publishTime}" th:text="${post.spec.publishTime}"></time>
+          <span th:if="${theme.config.features?.show_stats == null or theme.config.features.show_stats}">
+            <span aria-hidden="true">·</span>
+            <span th:text="${#numbers.formatInteger(post.stats.visit, 1, 'COMMA') + ' 次查看'}"></span>
+          </span>
+        </div>
+
+        <footer class="x-detail__actions">
+          <a class="x-action x-action--reply" href="#comments" aria-label="回复">
+            <span class="x-action__icon"><svg class="x-icon" viewBox="0 0 24 24"><use href="#i-reply"></use></svg></span>
+            <span class="x-action__count" th:if="${post.stats.comment > 0}" th:text="${post.stats.comment}"></span>
+          </a>
+          <button class="x-action x-action--like" type="button" th:attr="data-post-name=${post.metadata.name}" data-x-action="like" aria-label="点赞">
+            <span class="x-action__icon"><svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-heart"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-heart-f"></use></svg></span>
+            <span class="x-action__count" th:if="${post.stats.upvote > 0}" th:text="${post.stats.upvote}"></span>
+          </button>
+          <a class="x-action x-action--views" href="javascript:void(0)" aria-label="浏览">
+            <span class="x-action__icon"><svg class="x-icon" viewBox="0 0 24 24"><use href="#i-views"></use></svg></span>
+            <span class="x-action__count" th:text="${post.stats.visit}"></span>
+          </a>
+          <span class="x-action__spacer"></span>
+          <button class="x-action x-action--share" type="button" th:attr="data-href=${post.status.permalink}" data-x-action="share" aria-label="分享">
+            <span class="x-action__icon"><svg class="x-icon" viewBox="0 0 24 24"><use href="#i-share"></use></svg></span>
+          </button>
+        </footer>
+      </article>
+
+      <section class="x-replies" id="comments">
+        <h2 class="x-replies__title">回复</h2>
+        <div class="x-replies__body">
+          <th:block th:if="${theme.config.features?.enable_comment == null or theme.config.features.enable_comment}">
+            <th:block th:if="${haloCommentEnabled}">
+              <halo:comment group="content.halo.run" kind="Post" th:attr="name=${post.metadata.name}" />
+            </th:block>
+          </th:block>
+        </div>
+      </section>
+    </th:block>
+</html>

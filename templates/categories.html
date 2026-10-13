@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${'探索 / ' + site.title}"></title>
+  </th:block>
+    <th:block th:fragment="content">
+      <header class="x-topbar">
+        <div class="x-topbar__row">
+          <h1 class="x-topbar__title">探索</h1>
+          <div th:replace="~{modules/account :: actions}"></div>
+        </div>
+        <form class="x-search x-search--inline" th:action="@{/search}" method="get" role="search">
+          <svg class="x-icon x-search__icon" viewBox="0 0 24 24"><use href="#i-search"></use></svg>
+          <input class="x-search__input" type="search" name="keyword" placeholder="搜索文章" autocomplete="off" />
+        </form>
+      </header>
+
+      <section class="x-grid">
+        <a class="x-grid__item" th:each="category : ${categories}" th:href="@{${category.status.permalink}}">
+          <span class="x-grid__cover" th:if="${not #strings.isEmpty(category.spec.cover)}">
+            <img th:src="@{${category.spec.cover}}" th:alt="${category.spec.displayName}" loading="lazy" />
+          </span>
+          <span class="x-grid__cover x-grid__cover--hash" th:unless="${not #strings.isEmpty(category.spec.cover)}">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-community"></use></svg>
+          </span>
+          <span class="x-grid__body">
+            <span class="x-grid__name" th:text="${category.spec.displayName}"></span>
+            <span class="x-grid__count" th:text="${category.postCount + ' 篇帖子'}"></span>
+          </span>
+        </a>
+      </section>
+
+      <div class="x-empty" th:if="${categories == null or #lists.isEmpty(categories)}">
+        <h2>还没有分类</h2>
+        <p>在后台创建分类，它们会自动出现在这里。</p>
+      </div>
+    </th:block>
+</html>

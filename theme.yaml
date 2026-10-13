@@ -1,0 +1,30 @@
+apiVersion: theme.halo.run/v1alpha1
+kind: Theme
+metadata:
+  name: theme-x
+spec:
+  displayName: "X"
+  author:
+    name: Ander
+    website: ""
+  description: "高仿 X（Twitter）的 Halo 2.x 主题。三栏时间线布局、Lights out / Dim / Light 三档配色、推文形态的文章卡片、话题与归档时间线 —— 把你的博客当作一个 X 账号来逛。"
+  logo: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI2IiBmaWxsPSIjMGYxNDE5Ii8+PHBhdGggZmlsbD0iI2U3ZTllYSIgZD0iTTk0LjEgMjEuOWg5LjZMODIuMiA0Ny42IDEwNy40IDk4SDg2LjNMNjkuMSA3NS43IDQ5LjQgOThoLTkuN2wyMy4xLTI3LjVMMzguMSAyMS45aDIxLjdsMTUuNSAyMC41IDE4LjgtMjAuNVptLTMuNCA2OS40aDUuM0w1NS4xIDI3LjVoLTUuN2w0MS4zIDYzLjhaIi8+PC9zdmc+Cg=="
+  homepage: ""
+  repo: ""
+  issues: ""
+  settingName: "theme-x-setting"
+  configMapName: "theme-x-configmap"
+  version: "1.8.0"
+  requires: ">=2.0.0"
+  license:
+    - name: "MIT"
+      url: "https://opensource.org/licenses/MIT"
+  customTemplates:
+    post:
+      - name: "长推文"
+        description: "以 X 长推文的排版渲染文章：正文 17px、左对齐、弱化标题层级"
+        file: post_longform.html
+    page:
+      - name: "个人主页"
+        description: "以 X 个人主页的卡片样式渲染独立页面，带封面图与账号信息区"
+        file: page_profile.html

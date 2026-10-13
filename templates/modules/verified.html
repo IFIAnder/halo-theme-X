@@ -1,0 +1,16 @@
+<!--
+  认证徽章（可复用）
+  规则：
+  - 先看全局开关 brand.verified（关掉则谁都不显示）
+  - 再看 brand.verified_users：
+      · 留空  → 所有作者都显示
+      · 有填写 → 只有列表里的用户名显示（逗号分隔）
+-->
+<th:block
+  th:fragment="badge(handle)"
+  th:if="${(theme.config.brand?.verified == null or theme.config.brand.verified)
+           and (#strings.isEmpty(theme.config.brand?.verified_users)
+                or #strings.contains(',' + theme.config.brand.verified_users + ',', ',' + handle + ','))}"
+>
+  <svg class="x-icon x-verified" viewBox="0 0 24 24"><use href="#i-verified"></use></svg>
+</th:block>

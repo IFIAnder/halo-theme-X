@@ -1,0 +1,63 @@
+<!doctype html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:lang="${#locale.toLanguageTag}"
+  th:fragment="layout (title, head, body)"
+  th:attr="data-default-theme=${theme.config.appearance?.color_scheme ?: 'dark'}"
+  th:style="|--x-accent:${theme.config.appearance?.accent_color ?: '#1D9BF0'};--x-bg-dark-set:${theme.config.appearance?.bg_dark ?: '#000000'};--x-bg-dim-set:${theme.config.appearance?.bg_dim ?: '#15202B'};--x-bg-light-set:${theme.config.appearance?.bg_light ?: '#FFFFFF'};|"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2, viewport-fit=cover" />
+    <meta content="noindex,nofollow" name="robots" />
+    <title th:text="${title}"></title>
+
+    <th:block th:if="${head != null}">
+      <th:block th:replace="${head}"></th:block>
+    </th:block>
+
+    <link rel="preload" href="/images/wordmark.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/images/logo.png" as="image" type="image/png" />
+
+    <!-- 配色初始化（与前台一致，避免闪白） -->
+    <script>
+      (function () {
+        var root = document.documentElement;
+        root.setAttribute('data-default-theme', root.getAttribute('data-default-theme') || 'dark');
+      })();
+    </script>
+
+    <!-- Halo 认证页「逻辑脚本」：包含密码加密、表单提交等，必须保留 -->
+    <th:block th:replace="~{gateway_fragments/common::basicScriptResources}"></th:block>
+
+    <!-- 主题样式：X 风格 -->
+    <link rel="stylesheet" th:href="@{/assets/css/x.css(v=${theme.spec.version})}" />
+    <link rel="stylesheet" th:href="@{/assets/css/x-gateway.css(v=${theme.spec.version})}" />
+  </head>
+
+  <body class="x-gateway">
+    <div class="x-gateway__shell">
+      <div class="x-gateway__brand">
+        <a class="x-gateway__logo" th:href="@{/}" aria-label="返回首页">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+            />
+          </svg>
+        </a>
+        <h1 class="x-gateway__site" th:text="${site.title}">Halo</h1>
+        <p class="x-gateway__sub" th:if="${not #strings.isEmpty(site.subtitle)}" th:text="${site.subtitle}"></p>
+      </div>
+
+      <div class="x-gateway__card">
+        <th:block th:replace="${body}"></th:block>
+      </div>
+
+      <div class="x-gateway__footer">
+        <a th:href="@{/}">返回网站</a>
+      </div>
+    </div>
+  </body>
+</html>

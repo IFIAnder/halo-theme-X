@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${singlePage.spec.title}"></title>
+  </th:block>
+    <th:block
+      th:fragment="content"
+      th:with="
+        banner=${theme.config.brand?.banner},
+        avatarUrl=${theme.config.brand?.avatar ?: site.logo},
+        displayName=${#strings.isEmpty(theme.config.brand?.display_name) ? site.title : theme.config.brand.display_name},
+        handle=${#strings.isEmpty(theme.config.brand?.handle) ? #strings.toLowerCase(#strings.replace(site.title, ' ', '')) : theme.config.brand.handle},
+        bio=${#strings.isEmpty(theme.config.brand?.bio) ? (site.subtitle ?: '') : theme.config.brand.bio},
+        initial=${#strings.isEmpty(displayName) ? 'H' : #strings.substring(displayName, 0, 1)}
+      "
+    >
+      <header class="x-topbar x-topbar--detail">
+        <div class="x-topbar__row">
+          <a class="x-iconbtn" href="/" data-x-action="back" aria-label="返回">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-back"></use></svg>
+          </a>
+          <h1 class="x-topbar__title" th:text="${displayName}"></h1>
+          <div th:replace="~{modules/account :: actions}"></div>
+        </div>
+      </header>
+
+      <!-- 个人主页头图 -->
+      <section class="x-profile">
+        <div class="x-profile__banner">
+          <img th:if="${not #strings.isEmpty(banner)}" th:src="@{${banner}}" alt="" />
+          <div class="x-profile__banner-fallback" th:unless="${not #strings.isEmpty(banner)}"></div>
+        </div>
+        <div class="x-profile__bar">
+          <img
+            class="x-avatar x-avatar--96 x-profile__avatar"
+            th:if="${not #strings.isEmpty(avatarUrl)}"
+            th:src="@{${avatarUrl}}"
+            th:alt="${displayName}"
+          />
+          <span class="x-avatar x-avatar--96 x-avatar--fallback x-profile__avatar" th:unless="${not #strings.isEmpty(avatarUrl)}" th:text="${initial}"></span>
+          <a class="x-btn x-btn--outline" th:href="@{/rss.xml}" target="_blank" rel="noopener">订阅</a>
+        </div>
+        <div class="x-profile__info">
+          <h2 class="x-profile__name">
+            <span th:text="${displayName}"></span>
+            <th:block th:replace="~{modules/verified :: badge(${handle})}"></th:block>
+          </h2>
+          <span class="x-profile__handle" th:text="${'@' + handle}"></span>
+          <p class="x-profile__bio" th:if="${not #strings.isEmpty(bio)}" th:text="${bio}"></p>
+          <div class="x-profile__meta">
+            <span class="x-profile__meta-item">
+              <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-calendar"></use></svg>
+              <span>发布于 <span data-x-date="yyyy-MM" th:attr="data-datetime=${singlePage.spec.publishTime}">--</span></span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <article class="x-detail x-detail--page">
+        <div class="x-prose" th:utext="${singlePage.content.content}"></div>
+      </article>
+    </th:block>
+</html>

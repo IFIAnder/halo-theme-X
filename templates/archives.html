@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="https://www.thymeleaf.org"
+  th:replace="~{layout :: html(head = ~{::head}, content = ~{::content})}"
+>
+  <th:block th:fragment="head">
+    <title th:text="${'时间线 / ' + site.title}"></title>
+  </th:block>
+    <th:block th:fragment="content">
+      <header class="x-topbar">
+        <div class="x-topbar__row">
+          <h1 class="x-topbar__title">时间线</h1>
+          <div th:replace="~{modules/account :: actions}"></div>
+        </div>
+        <p class="x-topbar__sub">按时间倒序浏览全部帖子</p>
+      </header>
+
+      <div class="x-archive" data-x-timeline>
+        <th:block th:each="year : ${archives.items}">
+          <section class="x-archive__year">
+            <h2 class="x-archive__year-title" th:text="${year.year}"></h2>
+            <th:block th:each="month : ${year.months}">
+              <h3 class="x-archive__month-title" th:text="${month.month + ' 月'}"></h3>
+              <th:block th:each="post : ${month.posts}">
+                <div th:replace="~{modules/post-card :: card(${post})}"></div>
+              </th:block>
+            </th:block>
+          </section>
+        </th:block>
+      </div>
+
+      <div class="x-empty" th:if="${archives.items == null or #lists.isEmpty(archives.items)}">
+        <h2>还没有内容</h2>
+        <p>发布第一篇文章后，时间线就会出现在这里。</p>
+      </div>
+
+      <div class="x-loadmore" th:if="${archives.hasPrevious() or archives.hasNext()}">
+        <a class="x-btn x-btn--outline" th:if="${archives.hasPrevious()}" th:href="@{${archives.prevUrl}}">上一页</a>
+        <span class="x-loadmore__page" th:text="${archives.page + ' / ' + archives.totalPages}"></span>
+        <a class="x-btn x-btn--outline" th:if="${archives.hasNext()}" th:href="@{${archives.nextUrl}}">下一页</a>
+      </div>
+    </th:block>
+</html>

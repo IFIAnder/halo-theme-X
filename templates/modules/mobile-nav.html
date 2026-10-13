@@ -1,0 +1,52 @@
+<nav class="x-tabbar__inner" th:fragment="nav" aria-label="移动端导航">
+  <a class="x-tabbar__item" th:href="@{/}" aria-label="主页"
+     th:if="${theme.config.navigation?.nav_home == null or theme.config.navigation.nav_home == 'main'}">
+    <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-home"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-home-f"></use></svg>
+  </a>
+  <a
+    class="x-tabbar__item"
+    th:href="@{${theme.config.routes?.moments_uri ?: '/moments'}}"
+    aria-label="瞬间"
+    th:if="${(theme.config.features?.show_moments_nav == null or theme.config.features.show_moments_nav)
+            and (theme.config.navigation?.nav_moments == null or theme.config.navigation.nav_moments == 'main')}"
+  >
+    <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-sparkle"></use></svg>
+  </a>
+  <a
+    class="x-tabbar__item"
+    th:href="@{${site.routes?.categoriesUri ?: '/categories'}}"
+    aria-label="探索"
+    th:if="${theme.config.navigation?.nav_explore == null or theme.config.navigation.nav_explore == 'main'}"
+  >
+    <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-search"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-search-f"></use></svg>
+  </a>
+  <a class="x-tabbar__item" th:href="@{${site.routes?.tagsUri ?: '/tags'}}" aria-label="话题"
+     th:if="${theme.config.navigation?.nav_topics == null or theme.config.navigation.nav_topics == 'main'}">
+    <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-hash"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-hash-f"></use></svg>
+  </a>
+  <a class="x-tabbar__item" th:href="@{${site.routes?.archivesUri ?: '/archives'}}" aria-label="时间线"
+     th:if="${theme.config.navigation?.nav_timeline == null or theme.config.navigation.nav_timeline == 'main'}">
+    <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-clock"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-clock-f"></use></svg>
+  </a>
+  <a
+    class="x-tabbar__item"
+    th:href="@{/search}"
+    aria-label="搜索"
+    th:if="${(theme.config.features?.enable_search == null or theme.config.features.enable_search)
+            and (theme.config.navigation?.nav_search == null or theme.config.navigation.nav_search == 'main')}"
+  >
+    <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-grok"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-grok-f"></use></svg>
+  </a>
+  <!-- 自定义导航项 -->
+  <th:block th:if="${theme.config.navigation?.custom_nav != null}">
+    <a
+      class="x-tabbar__item"
+      th:each="cn : ${theme.config.navigation.custom_nav}"
+      th:if="${cn.pos == 'main' and cn.label != null and cn.label != '' and cn.url != null and cn.url != ''}"
+      th:href="@{${cn.url}}"
+      th:title="${cn.label}"
+    >
+      <svg class="x-icon" viewBox="0 0 24 24"><use th:href="${'#' + (cn.icon != null and cn.icon != '' ? cn.icon : 'i-hash')}"></use></svg>
+    </a>
+  </th:block>
+</nav>

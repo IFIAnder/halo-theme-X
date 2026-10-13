@@ -18,7 +18,9 @@
       initial=${#strings.isEmpty(authorName) ? 'A' : #strings.substring(authorName, 0, 1)},
       postTotal=${posts != null ? posts.total : 0},
       authorPosts=${posts != null ? posts.items : null},
-      ucUri=${theme.config.routes?.uc_uri ?: '/uc'},
+      annotationCover=${author != null and author.metadata != null and author.metadata.annotations != null and author.metadata.annotations['theme-x/cover'] != null ? author.metadata.annotations['theme-x/cover'] : ''},
+      defaultCover=${theme.config.brand?.author_cover ?: (theme.config.brand?.banner ?: '')},
+      authorCover=${not #strings.isEmpty(annotationCover) ? annotationCover : defaultCover},
       canEdit=${theme.config.features?.enable_profile_edit == null or theme.config.features.enable_profile_edit},
       isSelf=${#authentication != null and #authentication.isAuthenticated() and #authentication.name == authorHandle}
     "
@@ -38,7 +40,8 @@
 
     <section class="x-profile">
       <div class="x-profile__banner">
-        <div class="x-profile__banner-fallback"></div>
+        <img th:if="${not #strings.isEmpty(authorCover)}" th:src="@{${authorCover}}" alt="" />
+        <div class="x-profile__banner-fallback" th:unless="${not #strings.isEmpty(authorCover)}"></div>
       </div>
       <div class="x-profile__bar">
         <img
@@ -79,13 +82,6 @@
               >—</span>
             </span>
           </span>
-        </div>
-        <!-- 旧版个人中心入口保留，方便改密码 / 看插件页面 -->
-        <div class="x-profile__meta" th:if="${isSelf}">
-          <a class="x-profile__meta-item x-profile__meta-link" th:href="@{${ucUri}}">
-            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-profile"></use></svg>
-            <span>个人中心（旧入口）</span>
-          </a>
         </div>
       </div>
     </section>

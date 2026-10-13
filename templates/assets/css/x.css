@@ -2432,3 +2432,91 @@ body.x-has-modal {
     transform: none !important;
   }
 }
+
+/* ==========================================================================
+   20. 账号菜单（左下角账号卡片右侧「…」弹出的那个）
+   ========================================================================== */
+.x-account-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  /* 左栏是 align-items: flex-start，flex 子项不会自动撑满宽度 */
+  width: 100%;
+  margin-top: auto;
+}
+/* .x-account 原本自己带 margin-top:auto，现在由外层 wrap 负责贴底 */
+.x-account-wrap .x-account {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+.x-account-wrap .x-account__more {
+  font-size: 19px;
+}
+
+.x-account-menu {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 90;
+  min-width: 260px;
+  padding: 4px 0;
+  border-radius: 16px;
+  background: var(--x-bg);
+  border: 1px solid var(--x-border);
+  box-shadow: 0 0 0 1px var(--x-border), 0 8px 28px var(--x-shadow);
+  animation: x-pop-in var(--x-dur) var(--x-ease-out);
+  transform-origin: bottom left;
+}
+.x-account-menu[hidden] {
+  display: none !important;
+}
+
+.x-account-menu__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--x-border);
+}
+.x-account-menu__ident {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 20px;
+}
+.x-account-menu__name {
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.x-account-menu__handle {
+  color: var(--x-dim);
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.x-account-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--x-text);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--x-dur) var(--x-ease);
+}
+.x-account-menu__item:hover {
+  background: var(--x-bg-active);
+}
+.x-account-menu__item .x-icon {
+  flex-shrink: 0;
+  font-size: 19px;
+}

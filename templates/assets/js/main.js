@@ -271,7 +271,13 @@
   /* ------------------------------------------------------------------
    * 4. 点赞（Halo Upvote API）
    * ------------------------------------------------------------------ */
-  var UPVOTE_BASE = '/apis/api.halo.run/v1alpha1/upvotes';
+  /* 点赞端点在 trackers 下，不是 upvotes。
+     请求体必须是 { group, plural, name } —— 注意是 plural（posts / moments）而不是 kind。
+     字段写错时服务端不报错，照样返回 200，但点赞数不会增加，从结果上很难看出来。
+     参考 Halo 官方主题 theme-earth 的 src/assets/alpine-data/upvote.ts。 */
+  var UPVOTE_API = '/apis/api.halo.run/v1alpha1/trackers/upvote';
+  /* 阅读数上报，请求体形状与 upvote 相同 */
+  var COUNTER_API = '/apis/api.halo.run/v1alpha1/trackers/counter';
 
   /* 点赞目标：文章用 content.halo.run/posts，瞬间用 moment.halo.run/moments */
   function likeTarget(btn) {
@@ -325,39 +331,70 @@
       return;
     }
 
-    var annotation = encodeURIComponent(location.href.split('#')[0]);
-    var url =
-      UPVOTE_BASE +
-      '?group=' + encodeURIComponent(target.group) +
-      '&plural=' + encodeURIComponent(target.plural) +
-      '&name=' + encodeURIComponent(target.name) +
-      '&annotation=' + annotation;
-
-    fetch(url, { method: 'POST', headers: { Accept: 'application/json' } })
+    fetch(UPVOTE_API, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        group: target.group,
+        plural: target.plural,
+        name: target.name
+      })
+    })
       .then(function (res) {
-        if (!res.ok) throw new Error('upvote create failed');
-        return res.json();
-      })
-      .then(function (upvoteName) {
-        if (typeof upvoteName !== 'string') {
-          upvoteName = upvoteName && (upvoteName.name || upvoteName.upvote);
-        }
-        if (!upvoteName) throw new Error('no upvote name');
-        return fetch(UPVOTE_BASE + '/' + encodeURIComponent(upvoteName), {
-          method: 'POST'
-        });
-      })
-      .then(function () {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         try {
           localStorage.setItem(likeKey(target.key), '1');
         } catch (e) {}
         toast('已点赞');
       })
-      .catch(function () {
+      .catch(function (err) {
+        /* 回滚乐观更新，并把失败原因说清楚，不要一律「点赞失败」 */
         btn.classList.remove('is-liked');
         bumpCount(btn, -1);
-        toast('点赞失败，请稍后再试');
+        toast('点赞失败：' + (err && err.message ? err.message : '网络异常'));
       });
+  }
+
+  /* ------------------------------------------------------------------
+   * 4.5 阅读数上报
+   * 主题一直在展示「查看」数，但从没上报过 counter，所以数字永远是旧的。
+   * Halo 的 counter 不去重，因此用 sessionStorage 保证同一篇在一次会话里只报一次，
+   * 避免刷新页面刷出虚高的阅读量。
+   * ------------------------------------------------------------------ */
+  function viewKey(name) {
+    return 'x-viewed:' + name;
+  }
+
+  function reportView() {
+    if (root.hasAttribute('data-preview')) return;
+
+    var detail = $('.x-detail[data-post-name], .x-detail[data-moment-name]');
+    if (!detail) return;
+
+    var target = likeTarget(detail);
+    if (!target) return;
+
+    try {
+      if (sessionStorage.getItem(viewKey(target.key)) === '1') return;
+    } catch (e) {}
+
+    fetch(COUNTER_API, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        group: target.group,
+        plural: target.plural,
+        name: target.name
+      })
+    })
+      .then(function () {
+        try {
+          sessionStorage.setItem(viewKey(target.key), '1');
+        } catch (e) {}
+      })
+      .catch(function () {});
   }
 
   function restoreLikes() {
@@ -405,6 +442,42 @@
 
   function onDocClickNavMore(e) {
     if (navMoreEl && !navMoreEl.contains(e.target)) closeNavMore();
+  }
+
+  /* ------------------------------------------------------------------
+   * 5.6 账号菜单（左下角账号卡片右侧的「…」）
+   * 和「更多」菜单同一套思路：点击外部或按 Esc 关闭
+   * ------------------------------------------------------------------ */
+  var accountMenuEl = null;
+
+  function closeAccountMenu() {
+    if (accountMenuEl) {
+      accountMenuEl.hidden = true;
+      accountMenuEl = null;
+      document.removeEventListener('click', onDocClickAccountMenu, true);
+    }
+  }
+
+  function onDocClickAccountMenu(e) {
+    if (accountMenuEl && !accountMenuEl.contains(e.target)) closeAccountMenu();
+  }
+
+  function toggleAccountMenu(btn) {
+    var wrap = btn.closest('.x-account-wrap') || btn.parentElement;
+    var menu = wrap ? $('[data-x-account-menu]', wrap) : null;
+    if (!menu) return;
+
+    if (accountMenuEl === menu) {
+      closeAccountMenu();
+      return;
+    }
+    closeAccountMenu();
+    closeNavMore();
+    menu.hidden = false;
+    accountMenuEl = menu;
+    setTimeout(function () {
+      document.addEventListener('click', onDocClickAccountMenu, true);
+    }, 0);
   }
 
   /* ------------------------------------------------------------------
@@ -596,6 +669,15 @@
    * ------------------------------------------------------------------ */
   function initActions() {
     document.addEventListener('click', function (e) {
+      /* 账号菜单：点按钮开合，点心外部由 document 上的捕获监听关掉 */
+      var menuBtn = e.target.closest('[data-x-action="account-menu"]');
+      if (menuBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleAccountMenu(menuBtn);
+        return;
+      }
+
       /* 先处理弹层的开与关，避免被下面的按钮逻辑抢走 */
       var opener = e.target.closest('[data-x-modal-open]');
       if (opener) {
@@ -839,6 +921,7 @@
 
   function initModalKeys() {
     document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeAccountMenu();
       if (e.key !== 'Escape' || !activeModal) return;
       /* 编辑资料时 Esc 默认先关弹层，避免误丢内容 */
       e.preventDefault();
@@ -1040,6 +1123,7 @@
     initTabs();
     initSearch();
     initActions();
+    reportView();
     initModalKeys();
     initCompose();
     initProfileEdit();

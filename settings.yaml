@@ -115,7 +115,12 @@ spec:
           help: 会覆盖站点 Logo，在左侧导航与推文卡片中使用
         - $formkit: attachment
           name: banner
-          label: 个人主页封面图
+          label: 独立页面封面图
+          help: 使用「个人主页」自定义模板的独立页面所用的封面
+        - $formkit: attachment
+          name: author_cover
+          label: 作者主页默认封面图
+          help: 所有作者主页共用的封面。若某个作者的 User 资源上写了 theme-x/cover 注解，则以注解为准 —— 社区插件或后台编辑用户时写入该注解即可为单个作者定制封面。留空则回退到上面的封面图
         - $formkit: switch
           name: verified
           label: 显示认证蓝标
@@ -393,3 +398,52 @@ spec:
                   value: "more"
                 - label: 隐藏
                   value: "hide"
+
+        - $formkit: repeater
+          name: account_menu
+          label: 账号菜单项
+          help: 点击左下角账号卡片右侧「…」弹出的菜单。可以自由增删、排序；名称或链接留空的条目不显示。链接填 @uc 表示 Halo 自带的用户中心（跟随上面的「个人中心地址」）
+          addLabel: 添加菜单项
+          value:
+            - label: "用户中心"
+              url: "@uc"
+              icon: "i-profile"
+          children:
+            - $formkit: text
+              name: label
+              label: 名称
+              value: ""
+            - $formkit: text
+              name: url
+              label: 链接
+              placeholder: "@uc、/moments 或 https://example.com"
+              value: ""
+            - $formkit: select
+              name: icon
+              label: 图标
+              value: "i-profile"
+              options:
+                - label: 人像
+                  value: "i-profile"
+                - label: 井号 #
+                  value: "i-hash"
+                - label: 星芒
+                  value: "i-sparkle"
+                - label: 时钟
+                  value: "i-clock"
+                - label: 书签
+                  value: "i-bookmark"
+                - label: 社区
+                  value: "i-community"
+                - label: 图片
+                  value: "i-image"
+                - label: 日历
+                  value: "i-calendar"
+                - label: 笔
+                  value: "i-compose"
+                - label: 分享
+                  value: "i-share"
+                - label: 爱心
+                  value: "i-heart"
+                - label: 放大镜
+                  value: "i-search"

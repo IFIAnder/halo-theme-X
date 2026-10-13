@@ -1,0 +1,47 @@
+<!--
+  账号菜单（左下角账号卡片右侧「…」弹出的那个）
+  ------------------------------------------------------------------
+  菜单项来自主题设置 → 导航自定义 → 账号菜单项，可以自由增删排序。
+  链接填 @uc 时指向「个人中心地址」设置的值（Halo 自带的用户中心），
+  这样站长改了 /uc 前缀，这里会跟着走，不用改两处。
+
+  参数：displayName / handle / avatar / initial / ucUri / items
+-->
+<div
+  class="x-account-menu"
+  th:fragment="menu(displayName, handle, avatar, initial, ucUri, items)"
+  data-x-account-menu
+  hidden
+>
+  <div class="x-account-menu__head">
+    <img
+      class="x-avatar x-avatar--40"
+      th:if="${not #strings.isEmpty(avatar)}"
+      th:src="@{${avatar}}"
+      th:alt="${displayName}"
+    />
+    <span
+      class="x-avatar x-avatar--40 x-avatar--fallback"
+      th:unless="${not #strings.isEmpty(avatar)}"
+      th:text="${initial}"
+    ></span>
+    <span class="x-account-menu__ident">
+      <span class="x-account-menu__name" th:text="${displayName}"></span>
+      <span class="x-account-menu__handle" th:text="${'@' + handle}"></span>
+    </span>
+  </div>
+
+  <th:block th:if="${items != null and !#lists.isEmpty(items)}">
+    <a
+      class="x-account-menu__item"
+      th:each="mi : ${items}"
+      th:if="${mi.label != null and mi.label != '' and mi.url != null and mi.url != ''}"
+      th:href="@{${mi.url == '@uc' ? ucUri : mi.url}}"
+      th:target="${#strings.startsWith(mi.url, 'http') ? '_blank' : null}"
+      th:rel="${#strings.startsWith(mi.url, 'http') ? 'noopener' : null}"
+    >
+      <svg class="x-icon" viewBox="0 0 24 24"><use th:href="${'#' + (mi.icon != null and mi.icon != '' ? mi.icon : 'i-profile')}"></use></svg>
+      <span th:text="${mi.label}"></span>
+    </a>
+  </th:block>
+</div>

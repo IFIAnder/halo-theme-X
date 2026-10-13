@@ -28,7 +28,8 @@
     hasCustomNav=${customNav != null and !#lists.isEmpty(customNav)},
     hasMoreItems=${navHome == 'more' or navMoments == 'more' or navExplore == 'more' or navTopics == 'more' or navTimeline == 'more' or navSearch == 'more' or hasCustomNav},
     showMomentsNav=${theme.config.features?.show_moments_nav == null or theme.config.features.show_moments_nav},
-    showSearchNav=${theme.config.features?.enable_search == null or theme.config.features.enable_search}
+    showSearchNav=${theme.config.features?.enable_search == null or theme.config.features.enable_search},
+    accountMenu=${theme.config.navigation?.account_menu}
   "
   aria-label="主导航"
 >
@@ -189,21 +190,33 @@
                meAvatar=${me != null ? me.avatar : ''},
                meInitial=${#strings.isEmpty(meName) ? 'U' : #strings.substring(meName, 0, 1)}"
     >
-      <a class="x-account" th:href="@{${authorsUri + '/' + meHandle}}" th:title="${meName}">
-        <img
-          class="x-avatar x-avatar--40"
-          th:if="${not #strings.isEmpty(meAvatar)}"
-          th:src="@{${meAvatar}}"
-          th:alt="${meName}"
-          loading="lazy"
-        />
-        <span class="x-avatar x-avatar--40 x-avatar--fallback" th:unless="${not #strings.isEmpty(meAvatar)}" th:text="${meInitial}"></span>
-        <span class="x-account__meta">
-          <span class="x-account__name" th:text="${meName}"></span>
-          <span class="x-account__handle" th:text="${'@' + meHandle}"></span>
-        </span>
-        <svg class="x-icon x-account__more" viewBox="0 0 24 24"><use href="#i-more"></use></svg>
-      </a>
+      <div class="x-account-wrap">
+        <a class="x-account" th:href="@{${authorsUri + '/' + meHandle}}" th:title="${meName}">
+          <img
+            class="x-avatar x-avatar--40"
+            th:if="${not #strings.isEmpty(meAvatar)}"
+            th:src="@{${meAvatar}}"
+            th:alt="${meName}"
+            loading="lazy"
+          />
+          <span class="x-avatar x-avatar--40 x-avatar--fallback" th:unless="${not #strings.isEmpty(meAvatar)}" th:text="${meInitial}"></span>
+          <span class="x-account__meta">
+            <span class="x-account__name" th:text="${meName}"></span>
+            <span class="x-account__handle" th:text="${'@' + meHandle}"></span>
+          </span>
+        </a>
+        <!-- 原来这里是个纯装饰的 ‹…› 图标，点在 <a> 里只会跳转；现在拆成真正的按钮 -->
+        <button
+          class="x-iconbtn x-account__more"
+          type="button"
+          data-x-action="account-menu"
+          aria-label="账号菜单"
+          aria-haspopup="true"
+        >
+          <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-more"></use></svg>
+        </button>
+        <div th:replace="~{modules/account-menu :: menu(${meName}, ${meHandle}, ${meAvatar}, ${meInitial}, ${ucUri}, ${accountMenu})}"></div>
+      </div>
     </th:block>
   </th:block>
 

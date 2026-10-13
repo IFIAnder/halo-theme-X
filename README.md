@@ -65,7 +65,8 @@
 2. 进入 Halo 后台 → **外观 → 主题 → 安装主题** → 上传该 zip
 3. 启用主题后，进入 **主题设置** 调整配色与开关
 
-> 要求 Halo `>= 2.0.0`。开发调试时建议开启 `thymeleaf.cache: false`（或环境变量 `SPRING_THYMELEAF_CACHE=false`）。
+> 要求 Halo `>= 2.26.0` —— 主题依赖 2.26 引入的页面布局契约（`templates/layout.html`）与用户中心 API。
+> 开发调试时建议开启 `thymeleaf.cache: false`（或环境变量 `SPRING_THYMELEAF_CACHE=false`）。
 
 ## 功能性还原 X（可选，依赖社区插件）
 
@@ -112,7 +113,8 @@
 
 旧入口没有删：右栏账号卡片的「个人中心」按钮、以及作者主页资料区里为作者本人准备的「个人中心（旧入口）」链接，都仍然指向 `/uc`（地址可在主题设置里改）。
 
-> 这两处能力都依赖 Halo 的用户中心 API（`/apis/uc.api.*`，`UcUserEndpoint` 自 **2.26.0** 起提供）。低版本上按钮还在，但提交会返回错误提示。
+> 这两处能力都依赖 Halo 的用户中心 API（`/apis/uc.api.*` 下的 `UcUserEndpoint`，自 **2.26.0** 起提供），
+> 这也是主题把 `requires` 定在 `>= 2.26.0` 的原因。
 >
 > **为什么主题里能直接写数据**：Halo 的 CSRF 只保护表单类端点，`CsrfConfigurer` 里用 `NegatedServerWebExchangeMatcher` 明确把 `/api/**`、`/apis/**`、`/actuator/**`、`/system/setup`、`/sudo/**` 排除在保护之外，所以带会话 cookie 直接 `fetch` 即可，**不需要任何令牌**（那个 `XSRF-TOKEN` cookie 是 HttpOnly 的，前端本来也读不到）。
 

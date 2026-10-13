@@ -124,7 +124,7 @@ spec:
         - $formkit: textarea
           name: verified_users
           label: 带认证标识的用户
-          placeholder: 用户名，多个用英文逗号分隔，例如 ander,friedegg
+          placeholder: 用户名，多个用英文逗号分隔，例如 alice,bob
           help: 留空 = 所有作者都显示蓝标；填写后只有名单里的用户名显示。用户名即 /authors/ 后面的那段
 
     - group: layout
@@ -140,7 +140,8 @@ spec:
           value: true
         - $formkit: switch
           name: show_composer
-          label: 首页顶部显示「发帖」输入框
+          label: 首页顶部显示发瞬间入口
+          help: 就是首页时间线上方「有什么新鲜事？」那一行，点了会打开发瞬间弹层
           value: true
         - $formkit: switch
           name: show_mobile_nav
@@ -239,7 +240,7 @@ spec:
         - $formkit: text
           name: uc_uri
           label: 个人中心地址（旧入口）
-          help: Halo 自带的个人中心，默认为 /uc。开启「站内直接发瞬间」后，它只会作为侧边账号菜单里的备用入口保留
+          help: Halo 自带的个人中心，默认为 /uc。开启「站内直接发瞬间」后，它只作为右栏账号卡片上的按钮、以及作者主页里给作者本人的备用链接保留
           value: "/uc"
         - $formkit: text
           name: moment_publish_uri

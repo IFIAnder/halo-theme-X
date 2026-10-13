@@ -2,8 +2,15 @@
   个人资料编辑弹层（只给作者本人看）
   ------------------------------------------------------------------
   走 Halo 用户中心接口（/apis/** 免 CSRF）：
-  - PUT  /apis/uc.api.halo.run/v1alpha1/users/-          改「显示名 + 简介」
-  - POST /apis/uc.api.halo.run/v1alpha1/users/-/avatar   换头像（multipart，字段名固定 file）
+  - GET  /apis/api.console.halo.run/v1alpha1/users/-          读当前用户
+  - PUT  /apis/api.console.halo.run/v1alpha1/users/-          改「显示名 + 简介」
+  - POST /apis/api.console.halo.run/v1alpha1/users/-/avatar   换头像（multipart，字段名固定 file）
+
+  两点容易踩：
+  1. 都在 console 组下，不是 uc.api 组 —— uc.api 那个 users/- 只有 GET，
+     拿 PUT 去请求会撞上静态资源兜底，报「No static resource ...」。
+  2. PUT 吃的是完整的 User 对象，服务端还会校验 metadata.name 必须等于当前登录用户，
+     所以流程是「先 GET → 改 spec → 整体写回」，只提交 { displayName, bio } 不行。
   注意：PUT 的可改字段只有 displayName / bio，用户名改不了，头像必须走上传接口。
 
   参数：displayName / bio / avatar / initial / handle

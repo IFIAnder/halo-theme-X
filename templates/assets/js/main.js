@@ -1048,8 +1048,26 @@
      （CsrfConfigurer 里 NegatedServerWebExchangeMatcher 明确排除了 /api/** 和 /apis/**），
      所以这里带会话 cookie 直接请求即可，不需要任何令牌，也不该去读那个 HttpOnly 的 XSRF-TOKEN。 */
   var MOMENT_API = '/apis/uc.api.moment.halo.run/v1alpha1/moments';
-  var PROFILE_API = '/apis/uc.api.halo.run/v1alpha1/users/-';
-  var AVATAR_API = '/apis/uc.api.halo.run/v1alpha1/users/-/avatar';
+  /* 端点都在 console 组下，不是 uc.api 组。
+     uc.api.halo.run/v1alpha1/users/- 只有 GET，PUT 会撞上静态资源兜底并报
+     「No static resource ...」，看起来像路径写错，其实是根本没有这个路由。
+     另外 PUT 吃的是**完整的 User 对象**（服务端还会校验 metadata.name 必须等于
+     当前登录用户），只提交 { displayName, bio } 是不行的，必须先读再整体写回。 */
+  var PROFILE_API = '/apis/api.console.halo.run/v1alpha1/users/-';
+  var AVATAR_API = '/apis/api.console.halo.run/v1alpha1/users/-/avatar';
+
+  /* 读当前用户 → 改 spec 里的两个字段 → 整体 PUT 回去 */
+  function saveProfile(displayName, bio) {
+    return haloApi(PROFILE_API, { method: 'GET' }).then(function (user) {
+      if (!user || !user.metadata || !user.metadata.name) {
+        throw new Error('读不到当前用户');
+      }
+      user.spec = user.spec || {};
+      user.spec.displayName = displayName;
+      user.spec.bio = bio;
+      return haloApi(PROFILE_API, { method: 'PUT', body: user });
+    });
+  }
 
   function apiErrorText(res) {
     return res
@@ -1353,10 +1371,7 @@
       saveBtn.disabled = true;
       setHint(hint, '正在保存…');
 
-      haloApi(PROFILE_API, {
-        method: 'PUT',
-        body: { displayName: displayName, bio: (bioInput && bioInput.value ? bioInput.value : '').trim() }
-      })
+      saveProfile(displayName, (bioInput && bioInput.value ? bioInput.value : '').trim())
         .then(function () {
           /* 扩展资料是插件的独立接口，失败了也不该拦住显示名/简介的保存 */
           if (!pluginXOk) return null;

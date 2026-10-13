@@ -1056,9 +1056,12 @@
   var PROFILE_API = '/apis/api.console.halo.run/v1alpha1/users/-';
   var AVATAR_API = '/apis/api.console.halo.run/v1alpha1/users/-/avatar';
 
-  /* 读当前用户 → 改 spec 里的两个字段 → 整体 PUT 回去 */
+  /* 读当前用户 → 改 spec 里的两个字段 → 整体 PUT 回去。
+     注意 GET 这个端点返回的是 DetailedUser：{ roles: [...], user: {...} }，
+     User 包在 .user 里而不是根对象上；PUT 的响应才是裸的 User。 */
   function saveProfile(displayName, bio) {
-    return haloApi(PROFILE_API, { method: 'GET' }).then(function (user) {
+    return haloApi(PROFILE_API, { method: 'GET' }).then(function (data) {
+      var user = data && data.user ? data.user : data;
       if (!user || !user.metadata || !user.metadata.name) {
         throw new Error('读不到当前用户');
       }

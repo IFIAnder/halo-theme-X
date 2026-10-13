@@ -11,6 +11,8 @@
      拿 PUT 去请求会撞上静态资源兜底，报「No static resource ...」。
   2. PUT 吃的是完整的 User 对象，服务端还会校验 metadata.name 必须等于当前登录用户，
      所以流程是「先 GET → 改 spec → 整体写回」，只提交 { displayName, bio } 不行。
+  3. GET 返回的是 DetailedUser：{ roles: [...], user: {...} }，User 在 .user 里；
+     PUT 的响应才是裸的 User。两边结构不一样，别写成同一个取值方式。
   注意：PUT 的可改字段只有 displayName / bio，用户名改不了，头像必须走上传接口。
 
   参数：displayName / bio / avatar / initial / handle

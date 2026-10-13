@@ -5,10 +5,6 @@
   th:fragment="layout (title, head, body)"
   th:attr="data-default-theme=${theme.config.appearance?.color_scheme ?: 'dark'}"
   th:style="|--x-accent:${theme.config.appearance?.accent_color ?: '#1D9BF0'};--x-bg-dark-set:${theme.config.appearance?.bg_dark ?: '#000000'};--x-bg-dim-set:${theme.config.appearance?.bg_dim ?: '#15202B'};--x-bg-light-set:${theme.config.appearance?.bg_light ?: '#FFFFFF'};|"
-  th:with="
-    logoType=${theme.config.brand?.logo_type ?: 'x'},
-    logoImage=${theme.config.brand?.logo_image},
-    logoText=${#strings.isEmpty(theme.config.brand?.logo_text) ? site.title : theme.config.brand.logo_text}"
 >
   <head>
     <meta charset="UTF-8" />
@@ -42,12 +38,22 @@
 
   <body class="x-gateway">
     <div class="x-gateway__shell">
-      <div class="x-gateway__brand">
-        <!-- 跟随主题设置里的「站点标识」：X Logo / 自定义图片 / 文字 -->
+      <div
+        class="x-gateway__brand"
+        th:with="
+          logoType=${theme.config.brand?.logo_type ?: 'x'},
+          logoImage=${theme.config.brand?.logo_image},
+          logoText=${#strings.isEmpty(theme.config.brand?.logo_text) ? site.title : theme.config.brand.logo_text}"
+      >
+        <!--
+          跟随主题设置里的「站点标识」：X Logo / 自定义图片 / 文字。
+          注意：这里加的是 is-image / is-text，不要写成带双下划线的 BEM 类名 ——
+          `__` 是 Thymeleaf 的预处理表达式分隔符，出现在 th: 属性的值里会让模板解析直接失败（认证页 500）。
+        -->
         <a
           class="x-gateway__logo"
           th:href="@{/}"
-          th:classappend="${logoType == 'image' ? ' x-gateway__logo--image' : (logoType == 'text' ? ' x-gateway__logo--text' : '')}"
+          th:classappend="${logoType == 'image' ? ' is-image' : (logoType == 'text' ? ' is-text' : '')}"
           aria-label="返回首页"
         >
           <img

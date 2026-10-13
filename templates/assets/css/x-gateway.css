@@ -309,16 +309,16 @@ body.x-gateway .halo-form-wrapper {
 }
 
 /* ---------- 站点标识的另外两种形态（跟随主题设置） ---------- */
-.x-gateway__logo--image {
+.x-gateway__logo.is-image {
   border-radius: 14px;
 }
-.x-gateway__logo--image img {
+.x-gateway__logo.is-image img {
   width: 54px;
   height: 54px;
   border-radius: 14px;
   object-fit: cover;
 }
-.x-gateway__logo--text {
+.x-gateway__logo.is-text {
   width: auto;
   padding: 0 8px;
   border-radius: 12px;

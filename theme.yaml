@@ -5,7 +5,7 @@ metadata:
 spec:
   displayName: "X"
   author:
-    name: Ander
+    name: Ander.
     website: ""
   description: "高仿 X（Twitter）的 Halo 2.x 主题。三栏时间线布局、Lights out / Dim / Light 三档配色、推文形态的文章卡片、话题与归档时间线 —— 把你的博客当作一个 X 账号来逛。"
   logo: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjI2IiBmaWxsPSIjMGYxNDE5Ii8+PHBhdGggZmlsbD0iI2U3ZTllYSIgZD0iTTk0LjEgMjEuOWg5LjZMODIuMiA0Ny42IDEwNy40IDk4SDg2LjNMNjkuMSA3NS43IDQ5LjQgOThoLTkuN2wyMy4xLTI3LjVMMzguMSAyMS45aDIxLjdsMTUuNSAyMC41IDE4LjgtMjAuNVptLTMuNCA2OS40aDUuM0w1NS4xIDI3LjVoLTUuN2w0MS4zIDYzLjhaIi8+PC9zdmc+Cg=="

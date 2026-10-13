@@ -200,6 +200,11 @@ spec:
           help: 开启后，投稿入口会在主题内弹出 X 风格发帖框，直接调用瞬间接口发布；关闭则跳转到下面的「瞬间发布地址」
           value: true
         - $formkit: switch
+          name: enable_notifications
+          label: 导航中显示「通知」
+          help: 读取 Halo 原生通知中心（也就是个人中心里的「消息」）。装不装站内通知插件都能用 —— 插件的作用是让站长能群发消息，通知本身由 Halo 提供。未登录时不显示
+          value: true
+        - $formkit: switch
           name: enable_profile_edit
           label: 作者主页内编辑个人资料
           help: 开启后，作者本人在自己的作者主页会看到「编辑个人资料」，可直接改显示名、简介与头像
@@ -252,6 +257,11 @@ spec:
           label: 瞬间发布地址（回退用）
           help: 关闭「站内直接发瞬间」时，投稿入口会跳到这里，默认为 /uc/moments
           value: "/uc/moments"
+        - $formkit: text
+          name: notifications_uri
+          label: 通知页地址
+          help: 通知面板底部「查看全部」指向这里，Halo 默认在个人中心的消息里
+          value: "/uc"
         - $formkit: text
           name: authors_uri
           label: 作者页路由前缀

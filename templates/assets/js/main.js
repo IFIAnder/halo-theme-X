@@ -445,6 +445,33 @@
   }
 
   /* ------------------------------------------------------------------
+   * 5.5 作者主页：TA 常聊的话题
+   * 服务端只能按「当前页文章」把标签平铺出来，同一个标签会出现多次，
+   * 这里在前端去重并只保留前 6 个
+   * ------------------------------------------------------------------ */
+  function initAuthorTopics() {
+    var box = $('[data-x-author-topics]');
+    if (!box) return;
+
+    var MAX = 6;
+    var seen = {};
+    var kept = 0;
+
+    $$('[data-x-topic]', box).forEach(function (el) {
+      var name = (el.textContent || '').trim();
+      if (!name || seen[name] || kept >= MAX) {
+        el.remove();
+        return;
+      }
+      seen[name] = 1;
+      kept++;
+    });
+
+    if (kept) box.hidden = false;
+    else box.remove();
+  }
+
+  /* ------------------------------------------------------------------
    * 5.6 账号菜单（左下角账号卡片右侧的「…」）
    * 和「更多」菜单同一套思路：点击外部或按 Esc 关闭
    * ------------------------------------------------------------------ */
@@ -478,6 +505,179 @@
     setTimeout(function () {
       document.addEventListener('click', onDocClickAccountMenu, true);
     }, 0);
+  }
+
+  /* ------------------------------------------------------------------
+   * 5.8 通知（Halo 原生通知中心）
+   * 端点形如 /userspaces/{用户名}/notifications，注意是 userspaces 嵌套路径，
+   * 不是顶层的 /notifications（后者不存在，会 404）。
+   * 「站内通知」类插件通过 Halo 通知中心投递，所以不装插件照样有通知。
+   * ------------------------------------------------------------------ */
+  var NOTIFY_BASE = '/apis/api.notification.halo.run/v1alpha1/userspaces/';
+
+  function notifyApi(user, suffix) {
+    return NOTIFY_BASE + encodeURIComponent(user) + '/notifications' + (suffix || '');
+  }
+
+  var notifyEl = null;
+
+  function closeNotify() {
+    if (!notifyEl) return;
+    notifyEl.hidden = true;
+    notifyEl = null;
+    document.removeEventListener('click', onDocClickNotify, true);
+  }
+
+  function onDocClickNotify(e) {
+    if (notifyEl && !notifyEl.contains(e.target)) closeNotify();
+  }
+
+  function setNotifyStatus(panel, text) {
+    var box = $('[data-x-notify-status]', panel);
+    if (!box) return;
+    if (!text) {
+      box.hidden = true;
+      return;
+    }
+    box.hidden = false;
+    box.textContent = text;
+  }
+
+  function renderNotifyList(panel, items) {
+    var list = $('[data-x-notify-list]', panel);
+    var badge = $('[data-x-notify-badge]', document);
+    if (!list) return;
+
+    var unread = 0;
+    items.forEach(function (it) {
+      if (it && it.spec && it.spec.unread) unread++;
+    });
+
+    if (!items.length) {
+      setNotifyStatus(panel, '还没有通知');
+      list.hidden = true;
+      if (badge) badge.hidden = true;
+      return;
+    }
+
+    setNotifyStatus(panel, '');
+    list.innerHTML = items
+      .map(function (it) {
+        var spec = (it && it.spec) || {};
+        var meta = (it && it.metadata) || {};
+        var title = spec.title || spec.reason || '通知';
+        var time = meta.creationTimestamp ? relativeTime(new Date(meta.creationTimestamp)) : '';
+        var body = (spec.rawContent || '').slice(0, 120);
+        return (
+          '<li class="x-notify__item' + (spec.unread ? ' is-unread' : '') + '"' +
+          ' data-x-notify-item="' + escapeHtml(meta.name || '') + '">' +
+          '<span class="x-notify__dot"></span>' +
+          '<div class="x-notify__body">' +
+          '<div class="x-notify__itemhead">' +
+          '<span class="x-notify__itemtitle">' + escapeHtml(title) + '</span>' +
+          '<span class="x-notify__time">' + escapeHtml(time) + '</span>' +
+          '</div>' +
+          (body ? '<p class="x-notify__text">' + escapeHtml(body) + '</p>' : '') +
+          '</div>' +
+          '</li>'
+        );
+      })
+      .join('');
+    list.hidden = false;
+
+    if (badge) {
+      if (unread > 0) {
+        badge.textContent = unread > 99 ? '99+' : String(unread);
+        badge.hidden = false;
+      } else {
+        badge.hidden = true;
+      }
+    }
+  }
+
+  function loadNotify(panel, silent) {
+    var user = panel.getAttribute('data-x-notify-user');
+    if (!user || user === 'anonymousUser') return;
+    if (!silent) setNotifyStatus(panel, '正在加载…');
+
+    fetch(notifyApi(user, '?page=0&size=20'), {
+      credentials: 'same-origin',
+      headers: { Accept: 'application/json' }
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        renderNotifyList(panel, (data && data.items) || []);
+      })
+      .catch(function () {
+        /* 拉不到就安静地隐藏，不在页面上留下一个坏入口 */
+        setNotifyStatus(panel, '通知暂时不可用');
+        var badge = $('[data-x-notify-badge]', document);
+        if (badge) badge.hidden = true;
+      });
+  }
+
+  function markNotifyRead(panel, name) {
+    var user = panel.getAttribute('data-x-notify-user');
+    if (!user || !name) return;
+    fetch(notifyApi(user, '/' + encodeURIComponent(name) + '/mark-as-read'), {
+      method: 'PUT',
+      credentials: 'same-origin'
+    }).catch(function () {});
+  }
+
+  function markNotifyAllRead(panel) {
+    var user = panel.getAttribute('data-x-notify-user');
+    var names = $$('[data-x-notify-item]', panel)
+      .filter(function (el) { return el.classList.contains('is-unread'); })
+      .map(function (el) { return el.getAttribute('data-x-notify-item'); });
+    if (!user || !names.length) return;
+
+    fetch(notifyApi(user, '/-/mark-specified-as-read'), {
+      method: 'PUT',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ names: names })
+    })
+      .then(function () {
+        $$('[data-x-notify-item]', panel).forEach(function (el) {
+          el.classList.remove('is-unread');
+        });
+        var badge = $('[data-x-notify-badge]', document);
+        if (badge) badge.hidden = true;
+      })
+      .catch(function () {});
+  }
+
+  function toggleNotify(btn) {
+    var li = btn.closest('.x-nav__notify');
+    var panel = li ? $('[data-x-notify]', li) : null;
+    if (!panel) return;
+
+    if (notifyEl === panel) {
+      closeNotify();
+      return;
+    }
+    closeNotify();
+    closeNavMore();
+    closeAccountMenu();
+    panel.hidden = false;
+    notifyEl = panel;
+    loadNotify(panel, true);
+    setTimeout(function () {
+      document.addEventListener('click', onDocClickNotify, true);
+    }, 0);
+  }
+
+  /* 进页面就静默拉一次，只为了把未读徽标显示出来 */
+  function initNotifications() {
+    var panel = $('[data-x-notify]');
+    if (!panel) return;
+    var user = panel.getAttribute('data-x-notify-user');
+    if (!user || user === 'anonymousUser') return;
+    loadNotify(panel, true);
   }
 
   /* ------------------------------------------------------------------
@@ -750,6 +950,19 @@
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
+        if (action === 'notify-toggle') {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleNotify(actionEl);
+          return;
+        }
+        if (action === 'notify-read-all') {
+          e.preventDefault();
+          e.stopPropagation();
+          var panel = actionEl.closest('[data-x-notify]');
+          if (panel) markNotifyAllRead(panel);
+          return;
+        }
         if (action === 'nav-more') {
           e.preventDefault();
           e.stopPropagation();
@@ -775,6 +988,23 @@
       }
 
       /* 点击卡片空白处进入详情（与 X 一致） */
+      /* 点通知条目：标记已读并去掉未读样式 */
+      var notifyItem = e.target.closest('[data-x-notify-item]');
+      if (notifyItem && notifyEl) {
+        var itemName = notifyItem.getAttribute('data-x-notify-item');
+        if (notifyItem.classList.contains('is-unread')) {
+          notifyItem.classList.remove('is-unread');
+          markNotifyRead(notifyEl, itemName);
+          var badgeEl = $('[data-x-notify-badge]', document);
+          if (badgeEl) {
+            var left = $$('[data-x-notify-item].is-unread', notifyEl).length;
+            if (left > 0) badgeEl.textContent = left > 99 ? '99+' : String(left);
+            else badgeEl.hidden = true;
+          }
+        }
+        return;
+      }
+
       var post = e.target.closest('.x-post[data-href]');
       if (post && !e.target.closest('a, button, input')) {
         location.href = post.getAttribute('data-href');
@@ -921,7 +1151,10 @@
 
   function initModalKeys() {
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeAccountMenu();
+      if (e.key === 'Escape') {
+        closeAccountMenu();
+        closeNotify();
+      }
       if (e.key !== 'Escape' || !activeModal) return;
       /* 编辑资料时 Esc 默认先关弹层，避免误丢内容 */
       e.preventDefault();
@@ -1123,6 +1356,8 @@
     initTabs();
     initSearch();
     initActions();
+    initAuthorTopics();
+    initNotifications();
     reportView();
     initModalKeys();
     initCompose();

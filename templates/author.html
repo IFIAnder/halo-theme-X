@@ -21,6 +21,8 @@
       annotationCover=${author != null and author.metadata != null and author.metadata.annotations != null and author.metadata.annotations['theme-x/cover'] != null ? author.metadata.annotations['theme-x/cover'] : ''},
       defaultCover=${theme.config.brand?.author_cover ?: (theme.config.brand?.banner ?: '')},
       authorCover=${not #strings.isEmpty(annotationCover) ? annotationCover : defaultCover},
+      authorWebsite=${author != null and author.metadata != null and author.metadata.annotations != null and author.metadata.annotations['website'] != null ? author.metadata.annotations['website'] : ''},
+      authorWebsiteLabel=${#strings.replace(#strings.replace(authorWebsite, 'https://', ''), 'http://', '')},
       canEdit=${theme.config.features?.enable_profile_edit == null or theme.config.features.enable_profile_edit},
       isSelf=${#authentication != null and #authentication.isAuthenticated() and #authentication.name == authorHandle}
     "
@@ -70,8 +72,9 @@
           th:if="${authorBio != null and not #strings.isEmpty(authorBio)}"
           th:text="${authorBio}"
         ></p>
-        <div class="x-profile__meta" th:if="${showJoinDate and not #strings.isEmpty(authorJoinDate)}">
-          <span class="x-profile__meta-item">
+        <div class="x-profile__meta">
+          <!-- 加入日期 -->
+          <span class="x-profile__meta-item" th:if="${showJoinDate and not #strings.isEmpty(authorJoinDate)}">
             <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-calendar"></use></svg>
             <span>
               加入于
@@ -82,6 +85,44 @@
               >—</span>
             </span>
           </span>
+
+          <!-- 网站：取自 User 的 website 注解，社区插件（如 halo-plugin-X）或后台编辑用户时写入 -->
+          <a
+            class="x-profile__meta-item x-profile__meta-link"
+            th:if="${not #strings.isEmpty(authorWebsite)}"
+            th:href="${authorWebsite}"
+            target="_blank"
+            rel="noopener nofollow"
+            th:title="${authorWebsite}"
+          >
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-link"></use></svg>
+            <span th:text="${authorWebsiteLabel}"></span>
+          </a>
+
+          <!-- 帖子数：顶栏已经有一处，这里用图标化的形式再给一次锚点 -->
+          <span class="x-profile__meta-item">
+            <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-compose"></use></svg>
+            <span th:text="${postTotal + ' 篇帖子'}"></span>
+          </span>
+        </div>
+
+        <!-- TA 常聊的话题：从当前页文章里聚合，前端去重后取前 6 个 -->
+        <div
+          class="x-profile__topics"
+          th:if="${authorPosts != null and !#lists.isEmpty(authorPosts)}"
+          data-x-author-topics
+          hidden
+        >
+          <th:block th:each="ap : ${authorPosts}">
+            <th:block th:each="at : ${ap.tags}">
+              <a
+                class="x-profile__topic"
+                data-x-topic
+                th:href="@{${at.status.permalink}}"
+                th:text="${'#' + at.spec.displayName}"
+              ></a>
+            </th:block>
+          </th:block>
         </div>
       </div>
     </section>

@@ -2566,3 +2566,187 @@ html[data-theme] comment-widget {
   display: block;
   width: 100%;
 }
+
+/* ---------- 作者主页：常聊话题 ---------- */
+.x-profile__topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.x-profile__topic {
+  padding: 3px 12px;
+  border-radius: 9999px;
+  background: var(--x-bg-active);
+  color: var(--x-dim);
+  font-size: 14px;
+  line-height: 20px;
+  text-decoration: none;
+  transition: background var(--x-dur) var(--x-ease), color var(--x-dur) var(--x-ease);
+}
+.x-profile__topic:hover {
+  background: var(--x-bg-hover);
+  color: var(--x-text);
+}
+
+/* ==========================================================================
+   22. 通知（Halo 原生通知中心）
+   ========================================================================== */
+.x-nav__notify {
+  position: relative;
+}
+.x-nav__icon {
+  position: relative;
+}
+.x-nav__badge {
+  position: absolute;
+  top: -3px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: var(--x-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.x-notify {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 65;
+  width: 400px;
+  max-width: calc(100vw - 48px);
+  max-height: 70vh;
+  overflow-y: auto;
+  margin-top: 8px;
+  border-radius: 16px;
+  background: var(--x-bg);
+  border: 1px solid var(--x-border);
+  box-shadow: 0 0 0 1px var(--x-border), 0 12px 32px var(--x-shadow);
+  animation: x-pop-in var(--x-dur) var(--x-ease-out);
+  transform-origin: top left;
+}
+.x-notify[hidden] {
+  display: none !important;
+}
+.x-notify__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--x-border);
+}
+.x-notify__title {
+  font-size: 17px;
+  font-weight: 800;
+}
+.x-notify__readall {
+  border: 0;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--x-accent);
+  font-size: 14px;
+  font-weight: 600;
+  transition: background var(--x-dur) var(--x-ease);
+}
+.x-notify__readall:hover {
+  background: var(--x-bg-active);
+}
+.x-notify__status {
+  padding: 24px 16px;
+  color: var(--x-dim);
+  font-size: 15px;
+  text-align: center;
+}
+.x-notify__list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.x-notify__item {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--x-border);
+  cursor: pointer;
+  transition: background var(--x-dur) var(--x-ease);
+}
+.x-notify__item:last-child {
+  border-bottom: 0;
+}
+.x-notify__item:hover {
+  background: var(--x-bg-hover);
+}
+.x-notify__dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+.x-notify__item.is-unread .x-notify__dot {
+  background: var(--x-accent);
+}
+.x-notify__body {
+  min-width: 0;
+  flex: 1;
+}
+.x-notify__itemhead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.x-notify__itemtitle {
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.x-notify__item.is-unread .x-notify__itemtitle {
+  color: var(--x-text);
+}
+.x-notify__time {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--x-dim);
+  font-size: 13px;
+}
+.x-notify__text {
+  margin: 4px 0 0;
+  color: var(--x-dim);
+  font-size: 14px;
+  line-height: 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.x-notify__all {
+  display: block;
+  padding: 12px 16px;
+  border-top: 1px solid var(--x-border);
+  color: var(--x-accent);
+  font-size: 15px;
+  text-decoration: none;
+}
+.x-notify__all:hover {
+  background: var(--x-bg-hover);
+}
+
+/* 左栏收窄时通知面板靠左展开，避免被裁掉 */
+@media (max-width: 1265px) {
+  .x-notify {
+    left: 100%;
+    top: 0;
+    margin: 0 0 0 8px;
+    transform-origin: top left;
+  }
+}

@@ -29,7 +29,9 @@
     hasMoreItems=${navHome == 'more' or navMoments == 'more' or navExplore == 'more' or navTopics == 'more' or navTimeline == 'more' or navSearch == 'more' or hasCustomNav},
     showMomentsNav=${theme.config.features?.show_moments_nav == null or theme.config.features.show_moments_nav},
     showSearchNav=${theme.config.features?.enable_search == null or theme.config.features.enable_search},
-    accountMenu=${theme.config.navigation?.account_menu}
+    accountMenu=${theme.config.navigation?.account_menu},
+    notificationsUri=${theme.config.routes?.notifications_uri ?: '/uc'},
+    showNotifyNav=${theme.config.features?.enable_notifications == null or theme.config.features.enable_notifications}
   "
   aria-label="主导航"
 >
@@ -114,6 +116,26 @@
         <span class="x-nav__label">搜索</span>
       </a>
     </li>
+    <!-- 通知：对接 Halo 原生通知中心，未登录不显示 -->
+    <th:block sec:authorize="isAuthenticated()">
+      <li class="x-nav__notify" th:if="${showNotifyNav}">
+        <button
+          class="x-nav__item"
+          type="button"
+          data-x-action="notify-toggle"
+          aria-label="通知"
+          aria-haspopup="true"
+        >
+          <span class="x-nav__icon">
+            <svg class="x-icon x-icon--o" viewBox="0 0 24 24"><use href="#i-bell"></use></svg><svg class="x-icon x-icon--f" viewBox="0 0 24 24"><use href="#i-bell-f"></use></svg>
+            <span class="x-nav__badge" data-x-notify-badge hidden></span>
+          </span>
+          <span class="x-nav__label">通知</span>
+        </button>
+        <div th:replace="~{modules/notifications-panel :: panel(${#authentication.name}, ${notificationsUri})}"></div>
+      </li>
+    </th:block>
+
     <!-- 自定义导航项（常驻） -->
     <th:block th:if="${hasCustomNav}">
       <li

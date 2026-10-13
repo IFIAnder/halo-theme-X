@@ -1,0 +1,29 @@
+<!--
+  通知面板
+  ------------------------------------------------------------------
+  数据来自 Halo 原生通知中心：
+    GET  /apis/api.notification.halo.run/v1alpha1/userspaces/{用户名}/notifications
+    PUT  .../notifications/{name}/mark-as-read
+    PUT  .../notifications/-/mark-specified-as-read   body: { names: [...] }
+  「站内通知」这类插件是通过 Halo 的通知中心投递的，所以主题只对接 Halo 本身，
+  插件装与不装都能用 —— 差别只在于站长能不能群发。
+
+  参数：username / seeAllUri
+-->
+<div
+  class="x-notify"
+  th:fragment="panel(username, seeAllUri)"
+  data-x-notify
+  th:attr="data-x-notify-user=${username},data-x-notify-all=${seeAllUri}"
+  hidden
+>
+  <header class="x-notify__head">
+    <span class="x-notify__title">通知</span>
+    <button class="x-notify__readall" type="button" data-x-action="notify-read-all">全部已读</button>
+  </header>
+
+  <div class="x-notify__status" data-x-notify-status>正在加载…</div>
+  <ul class="x-notify__list" data-x-notify-list hidden></ul>
+
+  <a class="x-notify__all" th:href="@{${seeAllUri}}">在个人中心查看全部</a>
+</div>

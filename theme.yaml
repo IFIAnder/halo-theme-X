@@ -1,7 +1,10 @@
 apiVersion: theme.halo.run/v1alpha1
 kind: Theme
 metadata:
-  name: theme-x
+  # 唯一标识。原为 theme-x，上架应用市场时提示已被占用（太通用了），改成与仓库名一致的 halo-theme-x。
+  # settingName / configMapName 刻意保持不变 —— 主题设置存在那个 ConfigMap 里，
+  # 跟着改的话已装用户的配置就全丢了。
+  name: halo-theme-x
 spec:
   displayName: "X"
   author:
@@ -14,7 +17,7 @@ spec:
   issues: "https://github.com/IFIAnder/halo-theme-X/issues"
   settingName: "theme-x-setting"
   configMapName: "theme-x-configmap"
-  version: "1.12.5"
+  version: "1.12.6"
   requires: ">=2.26.0"
   license:
     - name: "MIT"

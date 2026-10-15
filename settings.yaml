@@ -143,6 +143,37 @@ spec:
           name: show_right_rail
           label: 桌面端显示右侧栏
           value: true
+        - $formkit: repeater
+          name: rail_cards
+          label: 右栏自定义卡片
+          help: 在右侧栏追加自定义卡片（公告、友链、二维码说明……），可自由增删、拖动排序，显示在账号卡片下方。标题、内容、链接全空的条目不显示；内容支持换行；链接留空则不显示底部链接
+          addLabel: 添加卡片
+          value:
+            - title: ""
+              content: ""
+              link_label: ""
+              link: ""
+          children:
+            - $formkit: text
+              name: title
+              label: 卡片标题
+              placeholder: 例如：关于本站
+              value: ""
+            - $formkit: textarea
+              name: content
+              label: 卡片内容
+              placeholder: 支持多行文本
+              value: ""
+            - $formkit: text
+              name: link_label
+              label: 链接文字
+              placeholder: 留空显示「了解更多」，仅在填了链接时生效
+              value: ""
+            - $formkit: text
+              name: link
+              label: 链接
+              placeholder: https://example.com 或 /tags
+              value: ""
         - $formkit: switch
           name: show_composer
           label: 首页顶部显示发瞬间入口

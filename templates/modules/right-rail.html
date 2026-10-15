@@ -9,6 +9,8 @@
     initial=${#strings.isEmpty(displayName) ? 'H' : #strings.substring(displayName, 0, 1)},
     ucUri=${theme.config.routes?.uc_uri ?: '/uc'},
     authorsUri=${theme.config.routes?.authors_uri ?: '/authors'},
+    railCards=${theme.config.layout?.rail_cards},
+    hasRailCards=${railCards != null and !#lists.isEmpty(railCards)},
     allTags=${tagFinder.listAll()}
   "
 >
@@ -103,6 +105,30 @@
         <a th:href="@{/rss.xml}" target="_blank" rel="noopener">RSS</a>
       </div>
     </section>
+
+    <!-- 站长自定义卡片：主题设置 → 布局 → 右栏自定义卡片 -->
+    <th:block th:if="${hasRailCards}">
+      <section
+        class="x-card"
+        th:each="rc : ${railCards}"
+        th:if="${(rc.title != null and rc.title != '') or (rc.content != null and rc.content != '') or (rc.link != null and rc.link != '')}"
+      >
+        <h2 class="x-card__title" th:if="${rc.title != null and rc.title != ''}" th:text="${rc.title}"></h2>
+        <p
+          class="x-card__text x-card__text--multiline"
+          th:if="${rc.content != null and rc.content != ''}"
+          th:text="${rc.content}"
+        ></p>
+        <a
+          class="x-card__more"
+          th:if="${rc.link != null and rc.link != ''}"
+          th:href="@{${rc.link}}"
+          th:target="${#strings.startsWith(rc.link, 'http') ? '_blank' : null}"
+          th:rel="${#strings.startsWith(rc.link, 'http') ? 'noopener' : null}"
+          th:text="${rc.link_label != null and rc.link_label != '' ? rc.link_label : '了解更多'}"
+        ></a>
+      </section>
+    </th:block>
 
     <!-- 正在发生 -->
     <th:block th:if="${theme.config.features?.enable_trends == null or theme.config.features.enable_trends}">

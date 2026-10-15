@@ -710,6 +710,19 @@ ol {
   background: var(--x-accent);
 }
 
+/* 作者页的 tab 栏独立于顶栏之外（在资料区之后），需要自己吸顶：
+   粘在顶栏下沿（53px 行高 + 1px 边框 = 54px），与归档页年份标题同一套路。
+   主页 / 瞬间页的 tabs 在 .x-topbar 内部，跟随顶栏整体 sticky，不加这个类。 */
+.x-tabs--sticky {
+  position: sticky;
+  top: 54px;
+  z-index: 10;
+  background: var(--x-bg-blur);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--x-border);
+}
+
 /* ---------- 8. 发帖框 ---------- */
 .x-composer {
   display: flex;
@@ -1478,6 +1491,12 @@ html[data-round-media="false"] .x-media--detail {
   width: var(--x-rail-w);
   padding-left: 30px;
   flex-shrink: 0;
+  /* ⚠️ 这行不能省：.x-app 是 align-items: flex-start 的 flex 容器，
+     不写 stretch 的话这层壳只有内容那么高，里面 .x-rail__sticky 的
+     包含块跟着变矮，sticky 根本粘不住 —— 表现为「右栏跟着帖子一起滚走」。
+     stretch 后壳撑到与主栏等高，sticky 才能全程生效。
+     （≤1005px 时右栏整栏 display: none，不受影响。） */
+  align-self: stretch;
 }
 .x-rail__sticky {
   position: sticky;
@@ -1565,6 +1584,11 @@ html[data-round-media="false"] .x-media--detail {
   font-size: 14px;
   line-height: 19px;
   margin-top: 10px;
+}
+/* 站长自定义卡片的正文：保留换行（textarea 里的回车按原样显示） */
+.x-card__text--multiline {
+  white-space: pre-line;
+  overflow-wrap: break-word;
 }
 .x-card__more {
   display: block;

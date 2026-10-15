@@ -52,7 +52,7 @@
 
         <div class="x-detail__meta">
           <time th:attr="datetime=${post.spec.publishTime}" th:text="${post.spec.publishTime}"></time>
-          <span th:if="${theme.config.features?.show_stats == null or theme.config.features.show_stats}">
+          <span th:if="${theme.config.content?.show_stats ?: theme.config.features?.show_stats ?: true}">
             <span aria-hidden="true">·</span>
             <span th:text="${#numbers.formatInteger(post.stats.visit, 1, 'COMMA') + ' 次查看'}"></span>
           </span>

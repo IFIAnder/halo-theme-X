@@ -1420,7 +1420,8 @@
    * ------------------------------------------------------------------ */
   function initSplash() {
     var splash = document.querySelector('[data-x-splash]');
-    if (!splash) return;
+    // 「仅首次访问」模式下，会话内二次加载时开屏已被 CSS 隐藏（display: none），无需处理
+    if (!splash || splash.getClientRects().length === 0) return;
     setTimeout(function () {
       splash.classList.add('is-done');
     }, 150);

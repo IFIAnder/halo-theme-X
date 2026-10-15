@@ -29,11 +29,11 @@
       <!-- 发帖框 -->
       <div
         class="x-composer"
-        th:if="${(theme.config.features?.enable_moment_publish == null or theme.config.features.enable_moment_publish)
-                 and (theme.config.layout?.show_composer == null or theme.config.layout.show_composer)}"
+        th:if="${(theme.config.moments?.enable_moment_publish ?: theme.config.features?.enable_moment_publish ?: true)
+                 and (theme.config.moments?.show_composer ?: theme.config.layout?.show_composer ?: true)}"
         th:with="publishUri=${theme.config.routes?.moment_publish_uri ?: '/uc/moments'},
                  loginUri=${theme.config.routes?.login_uri ?: '/login'},
-                 inlineCompose=${theme.config.features?.enable_inline_compose == null or theme.config.features.enable_inline_compose}"
+                 inlineCompose=${theme.config.moments?.enable_inline_compose ?: theme.config.features?.enable_inline_compose ?: true}"
       >
         <img
           class="x-avatar x-avatar--40"

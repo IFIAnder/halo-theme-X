@@ -3,7 +3,7 @@
   xmlns:th="https://www.thymeleaf.org"
   th:fragment="html (head, content)"
   th:lang="${site.language ?: 'zh-CN'}"
-  th:attr="data-default-theme=${theme.config.appearance?.color_scheme ?: 'dark'},data-timeline-mode=${theme.config.appearance?.timeline_mode ?: 'comfortable'},data-round-media=${theme.config.appearance?.round_media == null or theme.config.appearance.round_media ? 'true' : 'false'},data-allow-switch=${theme.config.appearance?.allow_visitor_switch == true ? 'true' : 'false'}"
+  th:attr="data-default-theme=${theme.config.appearance?.color_scheme ?: 'dark'},data-timeline-mode=${theme.config.content?.timeline_mode ?: theme.config.appearance?.timeline_mode ?: 'comfortable'},data-round-media=${theme.config.appearance?.round_media == null or theme.config.appearance.round_media ? 'true' : 'false'},data-allow-switch=${theme.config.appearance?.allow_visitor_switch == true ? 'true' : 'false'}"
   th:style="|--x-accent:${theme.config.appearance?.accent_color ?: '#1D9BF0'};--x-fs:${theme.config.appearance?.font_size ?: '15'}px;--x-bg-dark-set:${theme.config.appearance?.bg_dark ?: '#000000'};--x-bg-dim-set:${theme.config.appearance?.bg_dim ?: '#15202B'};--x-bg-light-set:${theme.config.appearance?.bg_light ?: '#FFFFFF'};|"
 >
   <head>
@@ -88,6 +88,22 @@
               root.setAttribute('data-theme', resolve('system'));
             }
           });
+        } catch (e) {}
+      })();
+    </script>
+    <!-- 开屏「仅首次访问」模式：本次会话已经看过就尽早打标记（HTML 里 splash 出现前），
+         CSS 直接不渲染，不会闪一下。存储不可用时退化为每次都显示，不影响进入页面。 -->
+    <script
+      th:if="${(theme.config.layout?.enable_loading_screen == null or theme.config.layout.enable_loading_screen)
+               and (theme.config.layout?.loading_screen_mode ?: 'session') == 'session'}"
+    >
+      (function () {
+        try {
+          if (window.sessionStorage.getItem('x-splash-seen')) {
+            document.documentElement.setAttribute('data-splash-skip', '');
+          } else {
+            window.sessionStorage.setItem('x-splash-seen', '1');
+          }
         } catch (e) {}
       })();
     </script>
@@ -328,11 +344,11 @@
 
     <!-- 瞬间投稿悬浮按钮（移动端右下角）
          开启「站内直接发瞬间」时打开主题内的 X 风格弹层，否则退回跳转旧发布地址 -->
-    <th:block th:if="${theme.config.features?.enable_moment_publish == null or theme.config.features.enable_moment_publish}">
+    <th:block th:if="${theme.config.moments?.enable_moment_publish ?: theme.config.features?.enable_moment_publish ?: true}">
       <th:block
         th:with="publishUri=${theme.config.routes?.moment_publish_uri ?: '/uc/moments'},
                  loginUri=${theme.config.routes?.login_uri ?: '/login'},
-                 inlineCompose=${theme.config.features?.enable_inline_compose == null or theme.config.features.enable_inline_compose}"
+                 inlineCompose=${theme.config.moments?.enable_inline_compose ?: theme.config.features?.enable_inline_compose ?: true}"
       >
         <th:block sec:authorize="isAuthenticated()">
           <button
@@ -360,7 +376,7 @@
     </th:block>
 
     <!-- 站内发瞬间弹层（仅登录用户渲染） -->
-    <th:block th:if="${theme.config.features?.enable_moment_publish == null or theme.config.features.enable_moment_publish}">
+    <th:block th:if="${theme.config.moments?.enable_moment_publish ?: theme.config.features?.enable_moment_publish ?: true}">
       <th:block sec:authorize="isAuthenticated()">
         <th:block
           th:with="me=${contributorFinder.getContributor(#authentication.name)},

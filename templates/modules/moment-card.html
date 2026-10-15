@@ -17,7 +17,7 @@
     momentsUri=${theme.config.routes?.moments_uri ?: '/moments'},
     authorsUri=${theme.config.routes?.authors_uri ?: '/authors'},
     detailUrl=${momentsUri + '/' + moment.metadata.name},
-    showStats=${theme.config.features?.show_stats == null or theme.config.features.show_stats}
+    showStats=${theme.config.content?.show_stats ?: theme.config.features?.show_stats ?: true}
   "
   th:attr="data-href=${detailUrl},data-moment-name=${moment.metadata.name}"
   role="article"

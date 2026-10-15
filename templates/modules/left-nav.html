@@ -27,11 +27,11 @@
     customNav=${theme.config.navigation?.custom_nav},
     hasCustomNav=${customNav != null and !#lists.isEmpty(customNav)},
     hasMoreItems=${navHome == 'more' or navMoments == 'more' or navExplore == 'more' or navTopics == 'more' or navTimeline == 'more' or navSearch == 'more' or hasCustomNav},
-    showMomentsNav=${theme.config.features?.show_moments_nav == null or theme.config.features.show_moments_nav},
+    showMomentsNav=${theme.config.navigation?.show_moments_nav ?: theme.config.features?.show_moments_nav ?: true},
     showSearchNav=${theme.config.features?.enable_search == null or theme.config.features.enable_search},
     accountMenu=${theme.config.navigation?.account_menu},
     notificationsUri=${theme.config.routes?.notifications_uri ?: '/uc'},
-    showNotifyNav=${theme.config.features?.enable_notifications == null or theme.config.features.enable_notifications}
+    showNotifyNav=${theme.config.navigation?.enable_notifications ?: theme.config.features?.enable_notifications ?: true}
   "
   aria-label="主导航"
 >

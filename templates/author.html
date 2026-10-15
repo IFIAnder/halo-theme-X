@@ -13,7 +13,7 @@
       authorHandle=${author != null and author.metadata != null ? author.metadata.name : 'unknown'},
       authorAvatar=${author != null ? author.spec.avatar : ''},
       authorBio=${author != null ? author.spec.bio : ''},
-      showJoinDate=${theme.config.features?.show_join_date == null or theme.config.features.show_join_date},
+      showJoinDate=${theme.config.content?.show_join_date ?: theme.config.features?.show_join_date ?: true},
       authorJoinDate=${author != null and author.spec != null and not #strings.isEmpty(author.spec.registeredAt) ? author.spec.registeredAt : (author != null and author.metadata != null ? (author.metadata.creationTimestamp ?: '') : '')},
       initial=${#strings.isEmpty(authorName) ? 'A' : #strings.substring(authorName, 0, 1)},
       postTotal=${posts != null ? posts.total : 0},

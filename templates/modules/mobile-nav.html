@@ -7,7 +7,7 @@
     class="x-tabbar__item"
     th:href="@{${theme.config.routes?.moments_uri ?: '/moments'}}"
     aria-label="瞬间"
-    th:if="${(theme.config.features?.show_moments_nav == null or theme.config.features.show_moments_nav)
+    th:if="${(theme.config.navigation?.show_moments_nav ?: theme.config.features?.show_moments_nav ?: true)
             and (theme.config.navigation?.nav_moments == null or theme.config.navigation.nav_moments == 'main')}"
   >
     <svg class="x-icon" viewBox="0 0 24 24"><use href="#i-sparkle"></use></svg>

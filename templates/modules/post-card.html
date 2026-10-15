@@ -8,9 +8,9 @@
     authorAvatar=${author != null ? author.avatar : ''},
     authorLink=${author != null and not #strings.isEmpty(author.permalink) ? author.permalink : '#'},
     initial=${#strings.isEmpty(authorName) ? 'A' : #strings.substring(authorName, 0, 1)},
-    showCover=${theme.config.features?.show_cover == null or theme.config.features.show_cover},
-    showStats=${theme.config.features?.show_stats == null or theme.config.features.show_stats},
-    showReading=${theme.config.features?.show_reading_time != null and theme.config.features.show_reading_time}
+    showCover=${theme.config.content?.show_cover ?: theme.config.features?.show_cover ?: true},
+    showStats=${theme.config.content?.show_stats ?: theme.config.features?.show_stats ?: true},
+    showReading=${theme.config.content?.show_reading_time ?: theme.config.features?.show_reading_time ?: false}
   "
   th:attr="data-href=${post.status.permalink},data-post-name=${post.metadata.name},data-pinned=${post.spec.pinned}"
   role="article"

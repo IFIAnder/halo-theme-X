@@ -2850,6 +2850,10 @@ html[data-theme] comment-widget {
   /* ⚠️ 必须换一个动画名：同名动画只改参数不会重启，换名才会立刻从头播（提前淡出） */
   animation: x-splash-out-now 0.3s ease forwards;
 }
+/* 「仅首次访问」模式下，会话内二次加载：head 里的脚本会给 <html> 打上标记，直接不渲染 */
+html[data-splash-skip] .x-splash {
+  display: none;
+}
 @keyframes x-splash-out {
   to {
     opacity: 0;

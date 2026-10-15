@@ -183,6 +183,11 @@ spec:
           name: show_mobile_nav
           label: 移动端显示底部导航栏
           value: true
+        - $formkit: switch
+          name: enable_loading_screen
+          label: 显示加载页（开屏）
+          help: 打开页面时先显示居中的站点标识再淡出，仿 X App 的启动画面。标识跟随「账号信息与标识」里的设置（X Logo / 图片 / 文字），目前每次整页加载都会出现一次
+          value: true
 
     - group: features
       label: 内容与交互

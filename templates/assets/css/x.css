@@ -2833,3 +2833,77 @@ html[data-theme] comment-widget {
 .x-pluginx .x-field:last-child {
   margin-bottom: 0;
 }
+
+/* ---------- 加载页（开屏） ---------- */
+/* 仿 X App 启动画面：一整屏居中大标识，页面就绪后由 main.js 加 .is-done 淡出。
+   这里的 3s 动画是兜底 —— 脚本不可用时也必须让路，不能把访客堵在开屏页。 */
+.x-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  background: var(--x-bg);
+  animation: x-splash-out 0.35s ease 3s forwards;
+}
+.x-splash.is-done {
+  /* ⚠️ 必须换一个动画名：同名动画只改参数不会重启，换名才会立刻从头播（提前淡出） */
+  animation: x-splash-out-now 0.3s ease forwards;
+}
+@keyframes x-splash-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@keyframes x-splash-out-now {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.x-splash__icon {
+  width: 96px;
+  height: 96px;
+  color: var(--x-text);
+}
+.x-splash__img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 22px;
+}
+.x-splash__text {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  padding: 0 24px;
+  text-align: center;
+}
+.x-splash__main {
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+.x-splash__sub {
+  color: var(--x-dim);
+  font-size: 14px;
+}
+
+@media (max-width: 705px) {
+  .x-splash__icon,
+  .x-splash__img {
+    width: 72px;
+    height: 72px;
+  }
+  .x-splash__main {
+    font-size: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* 对减弱动效的用户直接跳过开屏 */
+  .x-splash {
+    display: none;
+  }
+}

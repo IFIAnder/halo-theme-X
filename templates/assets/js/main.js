@@ -1415,7 +1415,22 @@
   }
 
   /* ------------------------------------------------------------------
-   * 13. 启动
+   * 13. 加载页（开屏）淡出
+   * 页面就绪后尽快让路；CSS 里还有 3s 兜底动画，脚本挂了也不会卡住
+   * ------------------------------------------------------------------ */
+  function initSplash() {
+    var splash = document.querySelector('[data-x-splash]');
+    if (!splash) return;
+    setTimeout(function () {
+      splash.classList.add('is-done');
+    }, 150);
+    splash.addEventListener('animationend', function () {
+      splash.remove();
+    });
+  }
+
+  /* ------------------------------------------------------------------
+   * 14. 启动
    * ------------------------------------------------------------------ */
   function boot() {
     initNavActive();
@@ -1432,6 +1447,7 @@
     initCompose();
     initProfileEdit();
     initImageFade();
+    initSplash();
   }
 
   if (document.readyState === 'loading') {

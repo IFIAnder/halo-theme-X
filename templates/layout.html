@@ -268,6 +268,43 @@
 
     </svg>
 
+    <!-- ============ 加载页（开屏） ============ -->
+    <!-- 仿 X App 的启动画面：页面就绪后由 main.js 淡出；脚本不可用时由 CSS 动画兜底自动消失，不会卡住页面。
+         标识跟随「账号信息与标识」设置，不写死（X Logo / 自定义图片 / 文字，与左栏同款回退逻辑）。 -->
+    <th:block th:if="${theme.config.layout?.enable_loading_screen == null or theme.config.layout.enable_loading_screen}">
+      <div
+        class="x-splash"
+        data-x-splash
+        aria-hidden="true"
+        th:with="
+          logoType=${theme.config.brand?.logo_type ?: 'x'},
+          logoImage=${theme.config.brand?.logo_image},
+          logoText=${#strings.isEmpty(theme.config.brand?.logo_text) ? site.title : theme.config.brand.logo_text},
+          logoSubtitle=${theme.config.brand?.logo_subtitle}
+        "
+      >
+        <!-- 文字形态 -->
+        <span class="x-splash__text" th:if="${logoType == 'text'}">
+          <span class="x-splash__main" th:text="${logoText}"></span>
+          <span class="x-splash__sub" th:if="${not #strings.isEmpty(logoSubtitle)}" th:text="${logoSubtitle}"></span>
+        </span>
+        <!-- 图片 / X Logo 形态（图片缺失时回退 X Logo，与左栏一致） -->
+        <th:block th:unless="${logoType == 'text'}">
+          <img
+            class="x-splash__img"
+            th:if="${logoType == 'image' and not #strings.isEmpty(logoImage)}"
+            th:src="@{${logoImage}}"
+            th:alt="${logoText}"
+          />
+          <svg
+            class="x-splash__icon"
+            th:if="${logoType == 'x' or (logoType == 'image' and #strings.isEmpty(logoImage))}"
+            viewBox="0 0 24 24"
+          ><use href="#i-x"></use></svg>
+        </th:block>
+      </div>
+    </th:block>
+
     <!-- ============ 应用骨架 ============ -->
     <div class="x-app">
       <th:block th:if="${theme.config.layout?.show_left_nav == null or theme.config.layout.show_left_nav}">
